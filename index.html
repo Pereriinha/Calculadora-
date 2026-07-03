@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Diárias - Eventos</title>
+<style>
+  /* ===================== RESET E BASE ===================== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: #f4f6f8;
+    color: #1f2937;
+    line-height: 1.5;
+    padding: 0;
+  }
+  header {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: #fff;
+    padding: 18px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  header h1 { font-size: 1.4rem; font-weight: 700; }
+  header p { font-size: 0.85rem; opacity: 0.9; margin-top: 4px; }
+
+  /* ===================== TABS ===================== */
+  .tabs {
+    display: flex;
+    background: #fff;
+    border-bottom: 2px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 14px 10px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #6b7280;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+    background: #eff6ff;
+  }
+  .tab-content { display: none; padding: 18px; max-width: 1100px; margin: 0 auto; }
+  .tab-content.active { display: block; }
+
+  /* ===================== CARDS / SECTIONS ===================== */
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .card h2 { font-size: 1.15rem; margin-bottom: 14px; color: #1e3a8a; }
+  .card h3 { font-size: 1rem; margin: 14px 0 8px; color: #374151; }
+
+  /* ===================== FORMS ===================== */
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .form-group { display: flex; flex-direction: column; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #374151; }
+  .hint { font-size: 0.75rem; color: #6b7280; margin-top: 3px; }
+  input, select, textarea {
+    padding: 9px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  }
+  textarea { resize: vertical; min-height: 120px; font-family: 'Courier New', monospace; }
+  input[readonly] { background: #f3f4f6; color: #4b5563; }
+
+  /* ===================== BUTTONS ===================== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 0.92rem;
+    font-weight: 600;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .btn-primary { background: #2563eb; color: #fff; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-success { background: #16a34a; color: #fff; }
+  .btn-success:hover { background: #15803d; }
+  .btn-danger { background: #dc2626; color: #fff; }
+  .btn-danger:hover { background: #b91c1c; }
+  .btn-secondary { background: #e5e7eb; color: #374151; }
+  .btn-secondary:hover { background: #d1d5db; }
+  .btn-warning { background: #d97706; color: #fff; }
+  .btn-warning:hover { background: #b45309; }
+  .btn-sm { padding: 6px 10px; font-size: 0.82rem; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+
+  /* ===================== EMPRESAS LIST ===================== */
+  .empresa-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 10px;
+    background: #fafafa;
+  }
+  .empresa-card .nome { font-weight: 700; font-size: 1.05rem; color: #1e3a8a; margin-bottom: 6px; }
+  .empresa-card .info { font-size: 0.88rem; color: #4b5563; margin-bottom: 3px; }
+  .empresa-card .regra { font-size: 0.82rem; color: #6b7280; font-style: italic; margin-bottom: 8px; }
+  .empresa-card .actions { display: flex; gap: 8px; }
+  .empty-state { text-align: center; padding: 30px; color: #9ca3af; font-style: italic; }
+
+  /* ===================== TABELAS ===================== */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th, td { padding: 9px 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+  th { background: #f3f4f6; font-weight: 700; color: #374151; white-space: nowrap; }
+  td input { padding: 6px 8px; font-size: 0.85rem; }
+  tr:hover { background: #f9fafb; }
+
+  /* ===================== RESUMO ===================== */
+  .resumo {
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border: 2px solid #10b981;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 18px;
+  }
+  .resumo h2 { color: #065f46; margin-bottom: 14px; font-size: 1.2rem; }
+  .resumo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  .resumo-item { background: #fff; border-radius: 8px; padding: 12px 14px; }
+  .resumo-item .label { font-size: 0.78rem; color: #6b7280; text-transform: uppercase; font-weight: 600; }
+  .resumo-item .value { font-size: 1.25rem; font-weight: 700; color: #065f46; margin-top: 4px; }
+  .resumo-item.total-geral { grid-column: 1 / -1; background: #065f46; color: #fff; }
+  .resumo-item.total-geral .label { color: #d1fae5; }
+  .resumo-item.total-geral .value { color: #fff; font-size: 1.6rem; }
+  .resumo-item .obs { font-size: 0.72rem; color: #6b7280; margin-top: 4px; }
+  .resumo-item.total-geral .obs { color: #d1fae5; }
+
+  /* ===================== ALERTS ===================== */
+  .alert { padding: 12px 14px; border-radius: 7px; margin: 10px 0; font-size: 0.88rem; }
+  .alert-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+  .alert-warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+  .alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+  .alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+
+  /* ===================== MODAL ===================== */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 22px;
+    max-width: 480px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal h3 { margin-bottom: 14px; color: #1e3a8a; }
+  .modal .btn-row { justify-content: flex-end; }
+
+  /* ===================== RESPONSIVO ===================== */
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.15rem; }
+    .tab-btn { font-size: 0.88rem; padding: 12px 6px; }
+    .card { padding: 14px; }
+    .resumo-item .value { font-size: 1.05rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Calculadora de Diárias - Eventos</h1>
+  <p>Calcule diárias de eventos corporativos a partir de folhas de ponto. Funciona 100% offline (exceto leitura de PDF).</p>
+</header>
+
+<!-- ===================== TABS ===================== -->
+<div class="tabs">
+  <button class="tab-btn active" data-tab="calcular" onclick="switchTab('calcular')">Calcular Evento</button>
+  <button class="tab-btn" data-tab="empresas" onclick="switchTab('empresas')">Empresas</button>
+</div>
+
+<!-- ===================== ABA: CALCULAR EVENTO ===================== -->
+<div id="tab-calcular" class="tab-content active">
+
+  <!-- Seleção da empresa -->
+  <div class="card">
+    <h2>1. Selecione a empresa contratante</h2>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label for="selectEmpresa">Empresa</label>
+        <select id="selectEmpresa" onchange="onEmpresaChange()">
+          <option value="">-- Selecione uma empresa --</option>
+        </select>
+        <div class="hint">Cadastre empresas na aba "Empresas".</div>
+      </div>
+      <div class="form-group">
+        <label>Valor da diária</label>
+        <input type="text" id="infoDiaria" readonly>
+      </div>
+      <div class="form-group">
+        <label>Alimentação por dia</label>
+        <input type="text" id="infoAlimentacao" readonly>
+        <div class="hint">Somada à parte, não entra no cálculo de horas.</div>
+      </div>
+      <div class="form-group full">
+        <label>Forma de carga horária</label>
+        <input type="text" id="infoRegra" readonly>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entrada de dados -->
+  <div class="card">
+    <h2>2. Informe os dias trabalhados</h2>
+
+    <div class="form-group full" style="margin-bottom:14px;">
+      <label for="inputPdf">Upload de PDF da folha de ponto (opcional)</label>
+      <input type="file" id="inputPdf" accept="application/pdf" onchange="onPdfSelected(event)">
+      <div class="hint">O texto extraído será colocado no campo abaixo para revisão. Requer internet apenas para carregar a biblioteca de leitura de PDF.</div>
+    </div>
+
+    <div id="pdfStatus"></div>
+
+    <div class="form-group full">
+      <label for="textareaFolha">Colar texto da folha de ponto</label>
+      <textarea id="textareaFolha" placeholder="Exemplo:&#10;01/05/2024&#10;Entrada: 08:00&#10;Saída: 20:00&#10;Horas trabalhadas: 12:00&#10;&#10;02/05/2024&#10;Entrada: 09:00&#10;Saída: 21:30"></textarea>
+      <div class="hint">Cole aqui o texto copiado do PDF ou o resultado da extração automática.</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="processarTexto()">Processar texto</button>
+      <button class="btn btn-secondary" onclick="limparTabela()">Limpar tabela</button>
+    </div>
+  </div>
+
+  <!-- Tabela editável -->
+  <div class="card">
+    <h2>3. Revise os dias trabalhados</h2>
+    <div id="tabelaContainer">
+      <div class="empty-state">Nenhum dia processado ainda. Cole o texto acima e clique em "Processar texto".</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="adicionarLinhaManual()">Adicionar linha manual</button>
+    </div>
+  </div>
+
+  <!-- Cálculo -->
+  <div class="card">
+    <h2>4. Calcular total do evento</h2>
+    <div class="btn-row">
+      <button class="btn btn-success" onclick="calcularTotalEvento()">Calcular Total do Evento</button>
+      <button class="btn btn-warning" onclick="exportarResultado()">Exportar resultado (CSV)</button>
+    </div>
+  </div>
+
+  <!-- Resumo -->
+  <div id="resumoContainer"></div>
+
+  <!-- Tabela com valores -->
+  <div class="card" id="resultadoCard" style="display:none;">
+    <h2>Detalhamento por dia</h2>
+    <div class="table-wrap" id="resultadoTableWrap"></div>
+  </div>
+
+</div>
+
+<!-- ===================== ABA: EMPRESAS ===================== -->
+<div id="tab-empresas" class="tab-content">
+
+  <div class="card">
+    <h2 id="formEmpresaTitulo">Cadastrar empresa</h2>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label for="empNome">Nome da empresa *</label>
+        <input type="text" id="empNome" placeholder="Ex: Produções XYZ Ltda">
+      </div>
+      <div class="form-group">
+        <label for="empDiaria">Valor da diária (R$) *</label>
+        <input type="text" id="empDiaria" inputmode="decimal" placeholder="Ex: 350,00">
+        <div class="hint">Corresponde a uma jornada de 12h.</div>
+      </div>
+      <div class="form-group">
+        <label for="empAlimentacao">Alimentação por dia (R$) *</label>
+        <input type="text" id="empAlimentacao" inputmode="decimal" placeholder="Ex: 50,00">
+        <div class="hint">NÃO entra no cálculo de horas. É somada à parte ao final.</div>
+      </div>
+      <div class="form-group full">
+        <label for="empRegra">Forma de carga horária *</label>
+        <select id="empRegra">
+          <option value="">-- Selecione a regra --</option>
+          <option value="regra1">12h meia diária / 16h dobra</option>
+          <option value="regra2">16h dobra</option>
+          <option value="regra3">12h até 15h proporcional 1/12 + 16h-19h 1,5 cachê + 20h+ 2 diárias</option>
+          <option value="regra4">Acima de 12h, hora extra a 1/4 de hora</option>
+          <option value="regra5">Acima de 12h, hora extra a 1/12 de hora</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnSalvarEmpresa" onclick="salvarEmpresa()">Salvar empresa</button>
+      <button class="btn btn-secondary" onclick="cancelarEdicaoEmpresa()">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Empresas cadastradas</h2>
+    <div class="btn-row" style="margin-top:0;margin-bottom:14px;">
+      <button class="btn btn-secondary" onclick="exportarBackup()">Exportar backup</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('inputImportar').click()">Importar backup</button>
+      <input type="file" id="inputImportar" accept="application/json" style="display:none" onchange="onImportarSelecionado(event)">
+    </div>
+    <div id="listaEmpresas"></div>
+  </div>
+
+</div>
+
+<!-- ===================== MODAL IMPORTAR ===================== -->
+<div class="modal-overlay" id="modalImportar">
+  <div class="modal">
+    <h3>Importar backup</h3>
+    <p style="margin-bottom:14px;font-size:0.9rem;">Escolha como deseja importar as empresas do arquivo:</p>
+    <div class="btn-row" style="flex-direction:column;align-items:stretch;">
+      <button class="btn btn-danger" onclick="confirmarImportacao('substituir')">Substituir tudo</button>
+      <button class="btn btn-primary" onclick="confirmarImportacao('mesclar')">Mesclar com existentes</button>
+      <button class="btn btn-secondary" onclick="fecharModalImportar()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   CALCULADORA DE DIÁRIAS - EVENTOS
+   Aplicativo web single-file (HTML+CSS+JS) para técnicos de vídeo.
+   Tudo client-side. Persistência em localStorage.
+   ===================================================================== */
+
+/* ===================== CONSTANTES ===================== */
+const STORAGE_KEY = 'empresas_calc_diarias_v1';
+
+// Mapeia os códigos de regra para nomes amigáveis (exibidos ao usuário)
+const REGRAS_NOMES = {
+  regra1: '12h meia diária / 16h dobra',
+  regra2: '16h dobra',
+  regra3: '12h até 15h proporcional 1/12 + 16h-19h 1,5 cachê + 20h+ 2 diárias',
+  regra4: 'Acima de 12h, hora extra a 1/4 de hora',
+  regra5: 'Acima de 12h, hora extra a 1/12 de hora'
+};
+
+/* ===================== ESTADO GLOBAL ===================== */
+let empresas = [];          // lista de empresas do localStorage
+let editandoEmpresaId = null; // id da empresa em edição (null = cadastro novo)
+let diasTrabalhados = [];   // lista de {data, entrada, saida, horasDecimal}
+let arquivoImportarPendente = null; // arquivo JSON aguardando confirmação
+let pdfJsCarregado = false; // flag: biblioteca pdf.js já foi carregada?
+
+/* ===================== UTILIDADES ===================== */
+
+// Gera um ID único simples
+function gerarId() {
+  return 'emp_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+}
+
+// Converte string "350,00" ou "350.00" ou "350" para número float
+function parseMoeda(str) {
+  if (str === null || str === undefined) return NaN;
+  let s = String(str).trim();
+  if (s === '') return NaN;
+  // remove R$ e espaços
+  s = s.replace(/R\$\s*/gi, '').replace(/\s/g, '');
+  // se tem vírgula e ponto: assume vírgula decimal (pt-BR), remove pontos de milhar
+  if (s.indexOf(',') !== -1 && s.indexOf('.') !== -1) {
+    s = s.replace(/\./g, '').replace(',', '.');
+  } else if (s.indexOf(',') !== -1) {
+    s = s.replace(',', '.');
+  }
+  const n = parseFloat(s);
+  return isNaN(n) ? NaN : n;
+}
+
+// Formata número para moeda R$ (vírgula decimal)
+function formatarMoeda(num) {
+  if (isNaN(num) || num === null || num === undefined) return 'R$ 0,00';
+  return 'R$ ' + num.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+// Formata horas decimais para exibição "Xh YYmin"
+function formatarHoras(decimal) {
+  if (isNaN(decimal) || decimal === null) return '0h 00min';
+  const totalMin = Math.round(decimal * 60);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return h + 'h ' + String(m).padStart(2, '0') + 'min';
+}
+
+/* ===================== TABS ===================== */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector('.tab-btn[data-tab="' + tab + '"]').classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'calcular') atualizarSelectEmpresas();
+}
+
+/* ===================== PERSISTÊNCIA EMPRESAS ===================== */
+function carregarEmpresas() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    empresas = raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    empresas = [];
+    console.error('Erro ao carregar empresas:', e);
+  }
+}
+
+function salvarEmpresasStorage() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(empresas));
+  } catch (e) {
+    alert('Erro ao salvar no navegador: ' + e.message);
+  }
+}
+
+/* ===================== ABA EMPRESAS: CRUD ===================== */
+
+function renderListaEmpresas() {
+  const container = document.getElementById('listaEmpresas');
+  if (empresas.length === 0) {
+    container.innerHTML = '<div class="empty-state">Nenhuma empresa cadastrada. Use o formulário acima.</div>';
+    return;
+  }
+  container.innerHTML = empresas.map(emp => `
+    <div class="empresa-card">
+      <div class="nome">${escapeHtml(emp.nome)}</div>
+      <div class="info">Diária: <strong>${formatarMoeda(emp.diaria)}</strong></div>
+      <div class="info">Alimentação/dia: <strong>${formatarMoeda(emp.alimentacao)}</strong> (somada à parte)</div>
+      <div class="regra">Regra: ${escapeHtml(REGRAS_NOMES[emp.regra] || emp.regra)}</div>
+      <div class="actions">
+        <button class="btn btn-secondary btn-sm" onclick="editarEmpresa('${emp.id}')">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="excluirEmpresa('${emp.id}')">Excluir</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function limparFormEmpresa() {
+  document.getElementById('empNome').value = '';
+  document.getElementById('empDiaria').value = '';
+  document.getElementById('empAlimentacao').value = '';
+  document.getElementById('empRegra').value = '';
+  editandoEmpresaId = null;
+  document.getElementById('formEmpresaTitulo').textContent = 'Cadastrar empresa';
+  document.getElementById('btnSalvarEmpresa').textContent = 'Salvar empresa';
+}
+
+function salvarEmpresa() {
+  const nome = document.getElementById('empNome').value.trim();
+  const diaria = parseMoeda(document.getElementById('empDiaria').value);
+  const alimentacao = parseMoeda(document.getElementById('empAlimentacao').value);
+  const regra = document.getElementById('empRegra').value;
+
+  // Validações
+  if (!nome) { alert('Informe o nome da empresa.'); return; }
+  if (isNaN(diaria) || diaria < 0) { alert('Informe um valor de diária válido.'); return; }
+  if (isNaN(alimentacao) || alimentacao < 0) { alert('Informe um valor de alimentação válido.'); return; }
+  if (!regra || !REGRAS_NOMES[regra]) { alert('Selecione a forma de carga horária.'); return; }
+
+  // Verifica duplicidade de nome (apenas em cadastro novo)
+  const duplicada = empresas.find(e => e.nome.toLowerCase() === nome.toLowerCase() && e.id !== editandoEmpresaId);
+  if (duplicada) {
+    if (!confirm('Já existe uma empresa com esse nome. Deseja salvar mesmo assim?')) return;
+  }
+
+  if (editandoEmpresaId) {
+    // Edição
+    const idx = empresas.findIndex(e => e.id === editandoEmpresaId);
+    if (idx !== -1) {
+      empresas[idx] = { ...empresas[idx], nome, diaria, alimentacao, regra };
+    }
+  } else {
+    // Novo
+    empresas.push({ id: gerarId(), nome, diaria, alimentacao, regra });
+  }
+
+  salvarEmpresasStorage();
+  renderListaEmpresas();
+  limparFormEmpresa();
+  alert('Empresa salva com sucesso!');
+}
+
+function editarEmpresa(id) {
+  const emp = empresas.find(e => e.id === id);
+  if (!emp) return;
+  editandoEmpresaId = id;
+  document.getElementById('empNome').value = emp.nome;
+  document.getElementById('empDiaria').value = String(emp.diaria).replace('.', ',');
+  document.getElementById('empAlimentacao').value = String(emp.alimentacao).replace('.', ',');
+  document.getElementById('empRegra').value = emp.regra;
+  document.getElementById('formEmpresaTitulo').textContent = 'Editar empresa';
+  document.getElementById('btnSalvarEmpresa').textContent = 'Atualizar empresa';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function excluirEmpresa(id) {
+  const emp = empresas.find(e => e.id === id);
+  if (!emp) return;
+  if (!confirm('Tem certeza que deseja excluir a empresa "' + emp.nome + '"?')) return;
+  empresas = empresas.filter(e => e.id !== id);
+  salvarEmpresasStorage();
+  renderListaEmpresas();
+  if (editandoEmpresaId === id) limparFormEmpresa();
+}
+
+function cancelarEdicaoEmpresa() {
+  limparFormEmpresa();
+}
+
+/* ===================== BACKUP EXPORT/IMPORT ===================== */
+
+function exportarBackup() {
+  if (empresas.length === 0) {
+    alert('Nenhuma empresa cadastrada para exportar.');
+    return;
+  }
+  const data = JSON.stringify(empresas, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const dataStr = new Date().toISOString().slice(0, 10);
+  a.download = 'backup_empresas_' + dataStr + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function onImportarSelecionado(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  arquivoImportarPendente = file;
+  // Abre modal para escolher modo
+  document.getElementById('modalImportar').classList.add('show');
+  // reset input para permitir re-selecionar mesmo arquivo
+  event.target.value = '';
+}
+
+function fecharModalImportar() {
+  document.getElementById('modalImportar').classList.remove('show');
+  arquivoImportarPendente = null;
+}
+
+function confirmarImportacao(modo) {
+  if (!arquivoImportarPendente) { fecharModalImportar(); return; }
+  const file = arquivoImportarPendente;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const importadas = JSON.parse(e.target.result);
+      if (!Array.isArray(importadas)) throw new Error('Formato inválido: esperado uma lista de empresas.');
+
+      if (modo === 'substituir') {
+        if (!confirm('Isso vai APAGAR todas as empresas atuais e substituir pelas do arquivo. Continuar?')) {
+          fecharModalImportar();
+          return;
+        }
+        // Garante que cada item tenha id
+        empresas = importadas.map(emp => ({
+          id: emp.id || gerarId(),
+          nome: emp.nome || 'Sem nome',
+          diaria: typeof emp.diaria === 'number' ? emp.diaria : parseMoeda(emp.diaria),
+          alimentacao: typeof emp.alimentacao === 'number' ? emp.alimentacao : parseMoeda(emp.alimentacao),
+          regra: emp.regra || 'regra1'
+        }));
+      } else {
+        // Mesclar: adiciona empresas novas por nome, sem duplicar nomes iguais
+        const nomesExistentes = empresas.map(e => e.nome.toLowerCase());
+        let adicionadas = 0;
+        importadas.forEach(emp => {
+          const nomeLower = (emp.nome || '').toLowerCase();
+          if (nomeLower && nomesExistentes.indexOf(nomeLower) === -1) {
+            empresas.push({
+              id: emp.id || gerarId(),
+              nome: emp.nome || 'Sem nome',
+              diaria: typeof emp.diaria === 'number' ? emp.diaria : parseMoeda(emp.diaria),
+              alimentacao: typeof emp.alimentacao === 'number' ? emp.alimentacao : parseMoeda(emp.alimentacao),
+              regra: emp.regra || 'regra1'
+            });
+            nomesExistentes.push(nomeLower);
+            adicionadas++;
+          }
+        });
+        alert('Mesclagem concluída. ' + adicionadas + ' empresa(s) nova(s) adicionada(s).');
+      }
+
+      salvarEmpresasStorage();
+      renderListaEmpresas();
+      fecharModalImportar();
+      if (modo === 'substituir') alert('Empresas substituídas com sucesso!');
+    } catch (err) {
+      alert('Erro ao importar arquivo: ' + err.message);
+      fecharModalImportar();
+    }
+  };
+  reader.onerror = function() {
+    alert('Erro ao ler o arquivo.');
+    fecharModalImportar();
+  };
+  reader.readAsText(file);
+}
+
+/* ===================== ABA CALCULAR: SELECT EMPRESA ===================== */
+
+function atualizarSelectEmpresas() {
+  const sel = document.getElementById('selectEmpresa');
+  const valorAtual = sel.value;
+  sel.innerHTML = '<option value="">-- Selecione uma empresa --</option>' +
+    empresas.map(e => `<option value="${e.id}">${escapeHtml(e.nome)}</option>`).join('');
+  // tenta manter seleção
+  if (valorAtual && empresas.find(e => e.id === valorAtual)) {
+    sel.value = valorAtual;
+    onEmpresaChange();
+  } else {
+    onEmpresaChange();
+  }
+}
+
+function onEmpresaChange() {
+  const id = document.getElementById('selectEmpresa').value;
+  const emp = empresas.find(e => e.id === id);
+  if (!emp) {
+    document.getElementById('infoDiaria').value = '';
+    document.getElementById('infoAlimentacao').value = '';
+    document.getElementById('infoRegra').value = '';
+    return;
+  }
+  document.getElementById('infoDiaria').value = formatarMoeda(emp.diaria);
+  document.getElementById('infoAlimentacao').value = formatarMoeda(emp.alimentacao);
+  document.getElementById('infoRegra').value = REGRAS_NOMES[emp.regra] || emp.regra;
+}
+
+/* ===================== PDF.JS (CARREGAMENTO DINÂMICO) ===================== */
+
+// Carrega pdf.js via CDN dinamicamente. Retorna Promise<boolean> (true se carregou).
+function carregarPdfJs() {
+  return new Promise((resolve) => {
+    if (pdfJsCarregado && window.pdfjsLib) { resolve(true); return; }
+    const statusDiv = document.getElementById('pdfStatus');
+    statusDiv.innerHTML = '<div class="alert alert-info">Carregando biblioteca de leitura de PDF...</div>';
+
+    const script = document.createElement('script');
+    // Versão estável do pdf.js
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    script.onload = function() {
+      try {
+        // Configura o worker do pdf.js (também via CDN)
+        if (window.pdfjsLib) {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          pdfJsCarregado = true;
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      } catch (e) {
+        console.error('Erro ao configurar pdf.js:', e);
+        resolve(false);
+      }
+    };
+    script.onerror = function() {
+      console.error('Falha ao carregar pdf.js (sem internet?).');
+      resolve(false);
+    };
+    document.head.appendChild(script);
+  });
+}
+
+async function onPdfSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const statusDiv = document.getElementById('pdfStatus');
+
+  const ok = await carregarPdfJs();
+  if (!ok) {
+    statusDiv.innerHTML =
+      '<div class="alert alert-warning">Sem internet no momento — cole o texto da folha de ponto manualmente no campo acima.</div>';
+    event.target.value = '';
+    return;
+  }
+
+  statusDiv.innerHTML = '<div class="alert alert-info">Lendo PDF... aguarde.</div>';
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let textoCompleto = '';
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const textoPagina = content.items.map(item => item.str).join(' ');
+      textoCompleto += textoPagina + '\n';
+    }
+
+    const textarea = document.getElementById('textareaFolha');
+    textarea.value = textoCompleto.trim();
+    statusDiv.innerHTML =
+      '<div class="alert alert-success">PDF lido com sucesso! Revise o texto extraído no campo acima antes de processar.</div>';
+  } catch (err) {
+    console.error('Erro ao ler PDF:', err);
+    statusDiv.innerHTML =
+      '<div class="alert alert-error">Erro ao ler o PDF: ' + err.message +
+      '. Tente colar o texto manualmente.</div>';
+  } finally {
+    event.target.value = '';
+  }
+}
+
+/* ===================== PARSER DE TEXTO DA FOLHA DE PONTO ===================== */
+
+/*
+  Parser tolerante. Procura por:
+  - datas: dd/mm/aaaa ou dd-mm-aaaa
+  - entrada: "Entrada:" ou "Entrada" seguido de HH:MM
+  - saída: "Saída:", "Saida:", "Saída" seguido de HH:MM
+  - horas trabalhadas: "Horas trabalhadas", "Total", "Total de horas" seguido de HH:MM ou "Xh Ymin"
+
+  Estratégia: percorre o texto linha a linha. Quando encontra uma data,
+  inicia um "bloco" e procura entrada/saída/horas nas linhas seguintes
+  até encontrar a próxima data.
+*/
+
+function parseHorasParaDecimal(str) {
+  if (!str) return NaN;
+  // Formato HH:MM
+  let m = str.match(/(\d{1,2}):(\d{2})/);
+  if (m) {
+    const h = parseInt(m[1], 10);
+    const min = parseInt(m[2], 10);
+    return h + min / 60;
+  }
+  // Formato "Xh Ymin" ou "Xh" ou "XhYmin"
+  m = str.match(/(\d+)\s*h\s*(\d+)?\s*m?/i);
+  if (m) {
+    const h = parseInt(m[1], 10);
+    const min = m[2] ? parseInt(m[2], 10) : 0;
+    return h + min / 60;
+  }
+  // Formato decimal puro (ex: "12.5" ou "12,5")
+  m = str.match(/(\d+[.,]\d+)/);
+  if (m) {
+    return parseFloat(m[1].replace(',', '.'));
+  }
+  return NaN;
+}
+
+function parseHorarioHHMM(str) {
+  if (!str) return null;
+  const m = str.match(/(\d{1,2}):(\d{2})/);
+  if (m) return m[0];
+  return null;
+}
+
+// Calcula diferença entre saída e entrada (considerando virada de dia se saída < entrada)
+function calcularDiferencaHoras(entrada, saida) {
+  const ent = parseHorarioHHMM(entrada);
+  const sai = parseHorarioHHMM(saida);
+  if (!ent || !sai) return NaN;
+  const [eh, em] = ent.split(':').map(Number);
+  const [sh, sm] = sai.split(':').map(Number);
+  let entMin = eh * 60 + em;
+  let saiMin = sh * 60 + sm;
+  if (saiMin < entMin) saiMin += 24 * 60; // virou o dia
+  return (saiMin - entMin) / 60;
+}
+
+function extrairData(linha) {
+  // dd/mm/aaaa ou dd-mm-aaaa (também aceita dd/mm/aa)
+  const m = linha.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+  if (!m) return null;
+  let dia = m[1].padStart(2, '0');
+  let mes = m[2].padStart(2, '0');
+  let ano = m[3];
+  if (ano.length === 2) ano = '20' + ano;
+  return dia + '/' + mes + '/' + ano;
+}
+
+function processarTexto() {
+  const texto = document.getElementById('textareaFolha').value;
+  if (!texto.trim()) {
+    alert('Cole o texto da folha de ponto primeiro.');
+    return;
+  }
+
+  const linhas = texto.split(/\r?\n/);
+  const resultado = [];
+  let blocoAtual = null; // {data, entrada, saida, horasExplicitas}
+  let linhasBloco = [];
+
+  // Regex para identificar campos
+  const regexEntrada = /entrada\s*:?\s*(\d{1,2}:\d{2})/i;
+  const regexSaida = /sa[ií]da\s*:?\s*(\d{1,2}:\d{2})/i;
+  const regexHoras = /(horas\s+trabalhadas|total\s+de\s+horas|total)\s*:?\s*(\d{1,2}:\d{2}|\d+\s*h\s*\d*\s*m?|\d+[.,]\d+)/i;
+
+  function finalizarBloco() {
+    if (!blocoAtual || !blocoAtual.data) { blocoAtual = null; linhasBloco = []; return; }
+
+    // Se não achou entrada/saída/horas nas linhas do bloco, tenta buscar na linha da própria data
+    const textoBloco = linhasBloco.join(' ');
+
+    let entrada = blocoAtual.entrada;
+    let saida = blocoAtual.saida;
+    let horasExplicitas = blocoAtual.horasExplicitas;
+
+    // Busca nos textos acumulados
+    if (!entrada) {
+      const m = textoBloco.match(regexEntrada);
+      if (m) entrada = m[1];
+    }
+    if (!saida) {
+      const m = textoBloco.match(regexSaida);
+      if (m) saida = m[1];
+    }
+    if (isNaN(horasExplicitas)) {
+      const m = textoBloco.match(regexHoras);
+      if (m) horasExplicitas = parseHorasParaDecimal(m[2]);
+    }
+
+    // Calcula horas se não tiver explícito
+    let horasDecimal = horasExplicitas;
+    if (isNaN(horasDecimal) && entrada && saida) {
+      horasDecimal = calcularDiferencaHoras(entrada, saida);
+    }
+
+    resultado.push({
+      data: blocoAtual.data,
+      entrada: entrada || '',
+      saida: saida || '',
+      horasDecimal: isNaN(horasDecimal) ? 0 : horasDecimal
+    });
+
+    blocoAtual = null;
+    linhasBloco = [];
+  }
+
+  for (let i = 0; i < linhas.length; i++) {
+    const linha = linhas[i];
+    const data = extrairData(linha);
+
+    if (data) {
+      // Nova data encontrada: finaliza bloco anterior
+      finalizarBloco();
+      blocoAtual = { data: data, entrada: null, saida: null, horasExplicitas: NaN };
+      linhasBloco = [linha];
+
+      // Tenta extrair entrada/saída/horas da própria linha da data (caso tudo esteja na mesma linha)
+      let m;
+      m = linha.match(regexEntrada); if (m) blocoAtual.entrada = m[1];
+      m = linha.match(regexSaida); if (m) blocoAtual.saida = m[1];
+      m = linha.match(regexHoras); if (m) blocoAtual.horasExplicitas = parseHorasParaDecimal(m[2]);
+    } else if (blocoAtual) {
+      // Continuação do bloco atual
+      linhasBloco.push(linha);
+      let m;
+      if (!blocoAtual.entrada) { m = linha.match(regexEntrada); if (m) blocoAtual.entrada = m[1]; }
+      if (!blocoAtual.saida) { m = linha.match(regexSaida); if (m) blocoAtual.saida = m[1]; }
+      if (isNaN(blocoAtual.horasExplicitas)) { m = linha.match(regexHoras); if (m) blocoAtual.horasExplicitas = parseHorasParaDecimal(m[2]); }
+    }
+  }
+  // Finaliza último bloco
+  finalizarBloco();
+
+  if (resultado.length === 0) {
+    alert('Não foi possível identificar nenhum dia no texto. Verifique o formato ou adicione as linhas manualmente.');
+    return;
+  }
+
+  diasTrabalhados = resultado;
+  renderTabelaDias();
+}
+
+/* ===================== TABELA EDITÁVEL DE DIAS ===================== */
+
+function renderTabelaDias() {
+  const container = document.getElementById('tabelaContainer');
+  if (diasTrabalhados.length === 0) {
+    container.innerHTML = '<div class="empty-state">Nenhum dia na tabela. Processe o texto ou adicione linhas manualmente.</div>';
+    return;
+  }
+  let html = '<div class="table-wrap"><table>';
+  html += '<thead><tr><th>Data</th><th>Entrada</th><th>Saída</th><th>Horas (decimal)</th><th>Ação</th></tr></thead><tbody>';
+  diasTrabalhados.forEach((dia, idx) => {
+    html += `<tr>
+      <td><input type="text" value="${escapeHtml(dia.data)}" onchange="atualizarDia(${idx}, 'data', this.value)"></td>
+      <td><input type="text" value="${escapeHtml(dia.entrada)}" onchange="atualizarDia(${idx}, 'entrada', this.value)" placeholder="HH:MM"></td>
+      <td><input type="text" value="${escapeHtml(dia.saida)}" onchange="atualizarDia(${idx}, 'saida', this.value)" placeholder="HH:MM"></td>
+      <td><input type="text" value="${dia.horasDecimal.toFixed(2).replace('.', ',')}" onchange="atualizarDia(${idx}, 'horas', this.value)" placeholder="Ex: 12,00"></td>
+      <td><button class="btn btn-danger btn-sm" onclick="removerDia(${idx})">Remover</button></td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  container.innerHTML = html;
+}
+
+function atualizarDia(idx, campo, valor) {
+  if (idx < 0 || idx >= diasTrabalhados.length) return;
+  if (campo === 'horas') {
+    // Se editar horas manualmente, recalcula a partir de entrada/saída se vazio
+    let v = parseMoeda(valor); // reusa parseMoeda que trata vírgula
+    if (isNaN(v)) {
+      // tenta formato HH:MM
+      v = parseHorasParaDecimal(valor);
+    }
+    diasTrabalhados[idx].horasDecimal = isNaN(v) ? 0 : v;
+  } else if (campo === 'entrada' || campo === 'saida') {
+    diasTrabalhados[idx][campo] = valor.trim();
+    // Recalcula horas automaticamente se ambos entrada e saída existirem
+    const d = diasTrabalhados[idx];
+    if (d.entrada && d.saida) {
+      const calc = calcularDiferencaHoras(d.entrada, d.saida);
+      if (!isNaN(calc)) d.horasDecimal = calc;
+    }
+  } else {
+    diasTrabalhados[idx][campo] = valor.trim();
+  }
+  renderTabelaDias();
+}
+
+function removerDia(idx) {
+  diasTrabalhados.splice(idx, 1);
+  renderTabelaDias();
+}
+
+function adicionarLinhaManual() {
+  diasTrabalhados.push({ data: '', entrada: '', saida: '', horasDecimal: 0 });
+  renderTabelaDias();
+}
+
+function limparTabela() {
+  if (diasTrabalhados.length > 0 && !confirm('Limpar todos os dias da tabela?')) return;
+  diasTrabalhados = [];
+  renderTabelaDias();
+  document.getElementById('resumoContainer').innerHTML = '';
+  document.getElementById('resultadoCard').style.display = 'none';
+}
+
+/* =====================================================================
+   FÓRMULAS DE CÁLCULO DE DIÁRIAS
+   =====================================================================
+   Cada função recebe (horasDecimal, valorDiaria) e retorna o valor em R$
+   a ser pago para aquele dia, conforme a regra da empresa.
+
+   A diária sempre corresponde a uma jornada de 12h.
+   ===================================================================== */
+
+function calcularValorDia(horasDecimal, valorDiaria, regra) {
+  if (isNaN(horasDecimal) || horasDecimal < 0) horasDecimal = 0;
+  if (isNaN(valorDiaria) || valorDiaria < 0) valorDiaria = 0;
+
+  switch (regra) {
+
+    /* ---- REGRA 1: "12h meia diária / 16h dobra" ----
+       - horas < 12h  -> 0,5 diária (meia diária)
+       - 12h <= horas < 16h -> 1 diária
+       - horas >= 16h -> 2 diárias (dobra) */
+    case 'regra1':
+      if (horasDecimal < 12) return valorDiaria * 0.5;
+      if (horasDecimal < 16) return valorDiaria * 1;
+      return valorDiaria * 2;
+
+    /* ---- REGRA 2: "16h dobra" ----
+       - horas < 16h  -> 1 diária (fixo, sem proporcional)
+       - horas >= 16h -> 2 diárias (dobra) */
+    case 'regra2':
+      if (horasDecimal < 16) return valorDiaria * 1;
+      return valorDiaria * 2;
+
+    /* ---- REGRA 3: "12h até 15h proporcional 1/12 + 16h-19h 1,5 cachê + 20h+ 2 diárias" ----
+       - horas <= 12h -> 1 diária
+       - 12h < horas < 16h -> 1 diária + (horas extras acima de 12h) * (diária/12)
+         [cada hora extra vale 1/12 da diária]
+       - 16h <= horas < 20h -> 1,5 * diária (cachê fixo nessa faixa)
+       - horas >= 20h -> 2 diárias
+
+       OBS: As faixas entre 15h-16h e 19h-20h foram UNIFICADAS à faixa adjacente
+       por ausência de regra explícita na descrição original. Ajuste os limites
+       abaixo se precisar refinar essas faixas. */
+    case 'regra3':
+      if (horasDecimal <= 12) return valorDiaria * 1;
+      if (horasDecimal < 16) {
+        const extras = horasDecimal - 12;
+        return valorDiaria + extras * (valorDiaria / 12);
+      }
+      if (horasDecimal < 20) return valorDiaria * 1.5;
+      return valorDiaria * 2;
+
+    /* ---- REGRA 4: "Acima de 12h, hora extra a 1/4 de hora" ----
+       - horas <= 12h -> 1 diária
+       - horas > 12h  -> 1 diária + (horas extras acima de 12h) * (diária/4)
+         [cada hora extra vale 1/4 da diária] */
+    case 'regra4':
+      if (horasDecimal <= 12) return valorDiaria * 1;
+      const extras4 = horasDecimal - 12;
+      return valorDiaria + extras4 * (valorDiaria / 4);
+
+    /* ---- REGRA 5: "Acima de 12h, hora extra a 1/12 de hora" ----
+       - horas <= 12h -> 1 diária
+       - horas > 12h  -> 1 diária + (horas extras acima de 12h) * (diária/12)
+         [cada hora extra vale 1/12 da diária] */
+    case 'regra5':
+      if (horasDecimal <= 12) return valorDiaria * 1;
+      const extras5 = horasDecimal - 12;
+      return valorDiaria + extras5 * (valorDiaria / 12);
+
+    default:
+      return 0;
+  }
+}
+
+/* ===================== CÁLCULO DO TOTAL DO EVENTO ===================== */
+
+function calcularTotalEvento() {
+  const empId = document.getElementById('selectEmpresa').value;
+  const emp = empresas.find(e => e.id === empId);
+  if (!emp) {
+    alert('Selecione uma empresa primeiro.');
+    return;
+  }
+  if (diasTrabalhados.length === 0) {
+    alert('Adicione ou processe os dias trabalhados primeiro.');
+    return;
+  }
+
+  // Calcula valor de cada dia
+  const diasComValor = diasTrabalhados.map(d => {
+    const valorDia = calcularValorDia(d.horasDecimal, emp.diaria, emp.regra);
+    return { ...d, valorDia };
+  });
+
+  // Totais
+  const totalDias = diasComValor.length;
+  const totalHoras = diasComValor.reduce((s, d) => s + (isNaN(d.horasDecimal) ? 0 : d.horasDecimal), 0);
+  const totalDiarias = diasComValor.reduce((s, d) => s + d.valorDia, 0);
+  const totalAlimentacao = emp.alimentacao * totalDias;
+  const totalGeral = totalDiarias + totalAlimentacao;
+
+  // Renderiza resumo
+  const resumoHtml = `
+    <div class="resumo">
+      <h2>Resumo do Evento</h2>
+      <div class="resumo-grid">
+        <div class="resumo-item">
+          <div class="label">Dias trabalhados</div>
+          <div class="value">${totalDias}</div>
+        </div>
+        <div class="resumo-item">
+          <div class="label">Total de horas</div>
+          <div class="value">${formatarHoras(totalHoras)}</div>
+        </div>
+        <div class="resumo-item">
+          <div class="label">Total em diárias</div>
+          <div class="value">${formatarMoeda(totalDiarias)}</div>
+        </div>
+        <div class="resumo-item">
+          <div class="label">Total em alimentação</div>
+          <div class="value">${formatarMoeda(totalAlimentacao)}</div>
+          <div class="obs">Somado à parte. Não influencia o cálculo de horas.</div>
+        </div>
+        <div class="resumo-item total-geral">
+          <div class="label">TOTAL GERAL DO EVENTO</div>
+          <div class="value">${formatarMoeda(totalGeral)}</div>
+          <div class="obs">Diárias + Alimentação</div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('resumoContainer').innerHTML = resumoHtml;
+
+  // Renderiza tabela detalhada com valor do dia
+  let tabelaHtml = '<div class="table-wrap"><table>';
+  tabelaHtml += '<thead><tr><th>Data</th><th>Entrada</th><th>Saída</th><th>Horas</th><th>Valor do dia (R$)</th></tr></thead><tbody>';
+  diasComValor.forEach(d => {
+    tabelaHtml += `<tr>
+      <td>${escapeHtml(d.data)}</td>
+      <td>${escapeHtml(d.entrada)}</td>
+      <td>${escapeHtml(d.saida)}</td>
+      <td>${formatarHoras(d.horasDecimal)}</td>
+      <td><strong>${formatarMoeda(d.valorDia)}</strong></td>
+    </tr>`;
+  });
+  tabelaHtml += '</tbody></table></div>';
+  document.getElementById('resultadoTableWrap').innerHTML = tabelaHtml;
+  document.getElementById('resultadoCard').style.display = 'block';
+
+  // Guarda para exportação
+  window._ultimoResultado = { emp, diasComValor, totalDias, totalHoras, totalDiarias, totalAlimentacao, totalGeral };
+
+  // Scroll suave até o resumo
+  document.getElementById('resumoContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ===================== EXPORTAR RESULTADO CSV ===================== */
+
+function exportarResultado() {
+  const r = window._ultimoResultado;
+  if (!r) {
+    alert('Calcule o total do evento primeiro.');
+    return;
+  }
+
+  // CSV com separador ; (compatível com Excel pt-BR)
+  let csv = '';
+  csv += 'Empresa;' + r.emp.nome + '\n';
+  csv += 'Diaria;' + formatarMoeda(r.emp.diaria) + '\n';
+  csv += 'Alimentacao/dia;' + formatarMoeda(r.emp.alimentacao) + '\n';
+  csv += 'Regra;' + (REGRAS_NOMES[r.emp.regra] || r.emp.regra) + '\n';
+  csv += '\n';
+  csv += 'Data;Entrada;Saida;Horas;Valor do dia (R$)\n';
+  r.diasComValor.forEach(d => {
+    csv += [
+      d.data,
+      d.entrada,
+      d.saida,
+      formatarHoras(d.horasDecimal),
+      d.valorDia.toFixed(2).replace('.', ',')
+    ].join(';') + '\n';
+  });
+  csv += '\n';
+  csv += 'RESUMO\n';
+  csv += 'Dias trabalhados;' + r.totalDias + '\n';
+  csv += 'Total de horas;' + formatarHoras(r.totalHoras) + '\n';
+  csv += 'Total em diarias;' + r.totalDiarias.toFixed(2).replace('.', ',') + '\n';
+  csv += 'Total em alimentacao;' + r.totalAlimentacao.toFixed(2).replace('.', ',') + '\n';
+  csv += 'TOTAL GERAL;' + r.totalGeral.toFixed(2).replace('.', ',') + '\n';
+
+  // BOM para Excel reconhecer UTF-8
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const dataStr = new Date().toISOString().slice(0, 10);
+  a.download = 'resultado_evento_' + dataStr + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ===================== INICIALIZAÇÃO ===================== */
+
+(function init() {
+  carregarEmpresas();
+  renderListaEmpresas();
+  atualizarSelectEmpresas();
+})();
+</script>
+</body>
+</html>
