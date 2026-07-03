@@ -3,1139 +3,541 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora de Diárias - Eventos</title>
+<title>Controle de Horas</title>
 <style>
-  /* ============ DESIGN BASE ============ */
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; }
   body {
-    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
     background: #f4f6f8;
     color: #2c3e50;
-    line-height: 1.5;
   }
   header {
-    background: #1f3a5f;
+    background: #2c3e50;
     color: #fff;
     padding: 16px 24px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  header h1 { font-size: 1.4rem; font-weight: 600; }
-  header p { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
-
-  /* ============ ABAS ============ */
-  .tabs {
     display: flex;
-    background: #fff;
-    border-bottom: 2px solid #e1e6eb;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
   }
-  .tab-btn {
-    padding: 14px 24px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-size: 1rem;
-    color: #5a6b7b;
-    border-bottom: 3px solid transparent;
-    transition: all 0.2s;
-  }
-  .tab-btn:hover { background: #f4f6f8; }
-  .tab-btn.active {
-    color: #1f3a5f;
-    border-bottom-color: #1f3a5f;
-    font-weight: 600;
-  }
-
-  .tab-content { display: none; padding: 24px; max-width: 1100px; margin: 0 auto; }
-  .tab-content.active { display: block; }
-
-  /* ============ CARDS / SEÇÕES ============ */
+  header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  header .spacer { flex: 1; }
+  .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
   .card {
     background: #fff;
     border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    padding: 16px;
+    margin-bottom: 18px;
   }
-  .card h2 {
-    font-size: 1.15rem;
-    color: #1f3a5f;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #e1e6eb;
+  .card h2 { margin: 0 0 12px; font-size: 16px; color: #34495e; }
+  label { display: inline-block; margin-right: 8px; font-size: 14px; }
+  input[type=text], input[type=date], input[type=number], select, textarea {
+    padding: 6px 8px;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-size: 14px;
   }
-  .card h3 { font-size: 1rem; color: #34495e; margin: 16px 0 10px; }
-
-  /* ============ FORMULÁRIOS ============ */
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 14px;
-  }
-  .form-group { display: flex; flex-direction: column; }
-  .form-group.full { grid-column: 1 / -1; }
-  label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #34495e;
-    margin-bottom: 4px;
-  }
-  .hint { font-size: 0.75rem; color: #7f8c8d; font-weight: 400; }
-  .obrigatorio { color: #c0392b; font-weight: 700; }
-  input, select, textarea {
-    padding: 9px 11px;
-    border: 1px solid #cfd8dc;
-    border-radius: 5px;
-    font-size: 0.95rem;
-    font-family: inherit;
-    background: #fff;
-  }
-  input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: #1f3a5f;
-    box-shadow: 0 0 0 2px rgba(31,58,95,0.15);
-  }
-  input[readonly] { background: #f0f3f6; color: #555; }
-  textarea { resize: vertical; min-height: 140px; font-family: 'Consolas', monospace; font-size: 0.88rem; }
-
-  /* ============ BOTÕES ============ */
-  .btn {
-    padding: 9px 18px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.92rem;
-    font-weight: 600;
-    transition: all 0.15s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .btn-primary { background: #1f3a5f; color: #fff; }
-  .btn-primary:hover { background: #2a4f80; }
-  .btn-secondary { background: #ecf0f3; color: #2c3e50; }
-  .btn-secondary:hover { background: #dde3e8; }
-  .btn-success { background: #27ae60; color: #fff; }
-  .btn-success:hover { background: #2ecc71; }
-  .btn-danger { background: #e74c3c; color: #fff; }
-  .btn-danger:hover { background: #c0392b; }
-  .btn-warning { background: #f39c12; color: #fff; }
-  .btn-warning:hover { background: #e67e22; }
-  .btn-sm { padding: 5px 10px; font-size: 0.82rem; }
-  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
-
-  /* ============ TABELA EMPRESAS ============ */
-  .empresas-lista { display: grid; gap: 12px; }
-  .empresa-card {
-    border: 1px solid #e1e6eb;
-    border-radius: 6px;
-    padding: 14px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    background: #fafbfc;
-  }
-  .empresa-info { flex: 1; min-width: 240px; }
-  .empresa-info .nome { font-weight: 700; color: #1f3a5f; font-size: 1.05rem; }
-  .empresa-info .detalhes { font-size: 0.85rem; color: #5a6b7b; margin-top: 3px; }
-  .empresa-info .regra { font-size: 0.8rem; color: #34495e; margin-top: 3px; font-style: italic; }
-  .empresa-acoes { display: flex; gap: 8px; }
-
-  /* ============ TABELA DIAS ============ */
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-  th, td { padding: 8px 10px; border: 1px solid #e1e6eb; text-align: left; }
-  th { background: #1f3a5f; color: #fff; font-weight: 600; }
-  tbody tr:nth-child(even) { background: #f8fafc; }
-  tbody tr:hover { background: #eef3f8; }
-  td input { width: 100%; padding: 5px 7px; font-size: 0.85rem; }
-  td .valor { text-align: right; font-variant-numeric: tabular-nums; }
-
-  /* ============ STATUS / RESUMO ============ */
-  .status { padding: 10px 14px; border-radius: 5px; margin: 12px 0; font-size: 0.92rem; }
-  .status.ok { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-  .status.erro { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-  .status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
-  .status.avisowarn { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-
-  .resumo {
-    background: linear-gradient(135deg, #1f3a5f, #2a4f80);
+  button {
+    background: #3b82f6;
     color: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    margin-top: 18px;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
   }
-  .resumo h2 { color: #fff; border: none; margin-bottom: 12px; }
-  .resumo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
-  .resumo-item { background: rgba(255,255,255,0.1); padding: 12px; border-radius: 6px; }
-  .resumo-item .label { font-size: 0.78rem; opacity: 0.85; }
-  .resumo-item .valor { font-size: 1.25rem; font-weight: 700; margin-top: 4px; }
-  .resumo-total { grid-column: 1 / -1; background: rgba(255,255,255,0.2); }
-  .resumo-total .valor { font-size: 1.6rem; color: #ffe082; }
-
-  .empresa-ref {
-    background: #f0f3f6;
+  button:hover { background: #2563eb; }
+  button.secondary { background: #6b7280; }
+  button.secondary:hover { background: #4b5563; }
+  button.danger { background: #dc2626; }
+  button.danger:hover { background: #b91c1c; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { border: 1px solid #e2e8f0; padding: 6px 8px; text-align: center; }
+  th { background: #edf2f7; color: #2d3748; }
+  td input, td select { width: 100%; min-width: 70px; }
+  .summary { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; }
+  .summary .item { background: #f1f5f9; padding: 8px 14px; border-radius: 6px; font-size: 14px; }
+  .summary .item strong { color: #1e40af; }
+  .total-horas {
+    margin-top: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e40af;
+    background: #e0ecff;
+    padding: 10px 14px;
     border-radius: 6px;
-    padding: 12px 14px;
-    margin-top: 10px;
-    font-size: 0.88rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 8px;
+    display: inline-block;
   }
-  .empresa-ref div span { font-weight: 700; color: #1f3a5f; }
-
-  .hidden { display: none !important; }
-  footer { text-align: center; padding: 20px; color: #95a5a6; font-size: 0.8rem; }
+  .row-actions button { padding: 4px 8px; font-size: 12px; margin: 0 2px; }
+  .event-area { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+  .hidden { display: none; }
+  .msg { padding: 8px 12px; border-radius: 4px; margin: 8px 0; font-size: 14px; }
+  .msg.ok { background: #dcfce7; color: #166534; }
+  .msg.err { background: #fee2e2; color: #991b1b; }
+  textarea { width: 100%; min-height: 120px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
-
 <header>
-  <h1>Calculadora de Diárias - Eventos</h1>
-  <p>Calcule diárias, horas extras e alimentação por evento a partir de folha de ponto.</p>
+  <h1>Controle de Horas</h1>
+  <div class="spacer"></div>
+  <label for="selectEmpresaEvento">Empresa do evento:</label>
+  <select id="selectEmpresaEvento"></select>
+  <button id="btnAplicarEmpresaTodas">Aplicar empresa a todas as linhas</button>
 </header>
 
-<!-- ============ ABAS ============ -->
-<nav class="tabs">
-  <button class="tab-btn active" data-tab="calcular">Calcular Evento</button>
-  <button class="tab-btn" data-tab="empresas">Empresas</button>
-</nav>
-
-<!-- ============ ABA CALCULAR EVENTO ============ -->
-<section id="tab-calcular" class="tab-content active">
+<div class="container">
+  <div id="msgBox"></div>
 
   <div class="card">
-    <h2>1. Selecione a empresa</h2>
-    <div class="form-grid">
-      <div class="form-group full">
-        <label for="selectEmpresa">Empresa</label>
-        <select id="selectEmpresa">
-          <option value="">-- Selecione a empresa --</option>
-        </select>
+    <h2>Importar dados</h2>
+    <div class="grid2">
+      <div>
+        <h2>PDF</h2>
+        <input type="file" id="pdfInput" accept="application/pdf">
+        <button id="btnProcessPdf" class="secondary">Processar PDF</button>
       </div>
-    </div>
-    <div id="empresaRef" class="empresa-ref hidden">
-      <div>Diária: <span id="refDiaria">-</span></div>
-      <div>Alimentação/dia: <span id="refAlimentacao">-</span></div>
-      <div>Regra: <span id="refRegra">-</span></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>2. Informe a folha de ponto</h2>
-
-    <div class="form-group full" style="margin-bottom:14px;">
-      <label for="inputPdf">Enviar PDF da folha de ponto</label>
-      <input type="file" id="inputPdf" accept=".pdf">
-    </div>
-
-    <div id="pdfStatus" class="status hidden"></div>
-
-    <div class="form-group full">
-      <label for="textareaFolha">Ou cole aqui o texto da folha de ponto</label>
-      <span class="hint">O texto extraído do PDF aparecerá aqui para revisão/edição antes de processar.</span>
-      <textarea id="textareaFolha" placeholder="Cole aqui o texto da folha de ponto (uma linha por dia)..."></textarea>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary" id="btnProcessar">Processar</button>
-      <button class="btn btn-secondary" id="btnLimpar">Limpar</button>
-    </div>
-
-    <div id="processarStatus" class="status hidden"></div>
-  </div>
-
-  <div class="card hidden" id="cardTabela">
-    <h2>3. Dias detectados (editável)</h2>
-    <div class="table-wrap">
-      <table id="tabelaDias">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Entrada</th>
-            <th>Saída</th>
-            <th>Horas</th>
-            <th>Evento/Observação</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody id="tbodyDias"></tbody>
-      </table>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-secondary btn-sm" id="btnAddLinha">+ Adicionar linha manual</button>
-      <button class="btn btn-success" id="btnCalcular">Calcular Total do Evento</button>
-    </div>
-  </div>
-
-  <div class="card hidden" id="cardResultado">
-    <h2>4. Resultado detalhado</h2>
-    <div class="table-wrap">
-      <table id="tabelaResultado">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Entrada</th>
-            <th>Saída</th>
-            <th>Horas</th>
-            <th>Evento</th>
-            <th>Valor do dia (R$)</th>
-            <th>Alimentação do dia (R$)</th>
-          </tr>
-        </thead>
-        <tbody id="tbodyResultado"></tbody>
-      </table>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-warning" id="btnCsv">Exportar resultado (CSV)</button>
-    </div>
-
-    <div class="resumo" id="resumoFinal"></div>
-  </div>
-
-</section>
-
-<!-- ============ ABA EMPRESAS ============ -->
-<section id="tab-empresas" class="tab-content">
-
-  <div class="card">
-    <h2 id="formEmpresaTitulo">Cadastrar empresa</h2>
-    <input type="hidden" id="empresaId">
-    <div class="form-grid">
-      <div class="form-group full">
-        <label for="inpNome">Nome da empresa</label>
-        <input type="text" id="inpNome" placeholder="Ex: CABORÉ">
+      <div>
+        <h2>Texto (colar)</h2>
+        <textarea id="textoInput" placeholder="Cole aqui o texto extraído..."></textarea>
+        <div style="margin-top:8px; display:flex; gap:8px;">
+          <button id="btnParseTexto1" class="secondary">Parser 1</button>
+          <button id="btnParseTexto2" class="secondary">Parser 2</button>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="inpDiaria">Valor da diária (R$) <span class="hint">— corresponde a 12h</span></label>
-        <input type="number" id="inpDiaria" step="0.01" min="0" placeholder="Ex: 350.00">
-      </div>
-      <div class="form-group">
-        <label for="inpAlimentacao">Valor da alimentação por dia (R$) <span class="obrigatorio">*</span></label>
-        <input type="number" id="inpAlimentacao" step="0.01" min="0" placeholder="Ex: 50.00">
-        <span class="hint">Obrigatório. Este valor <strong>NÃO</strong> entra no cálculo de carga horária — é somado separadamente ao final.</span>
-      </div>
-      <div class="form-group full">
-        <label for="inpRegra">Forma de carga horária</label>
-        <select id="inpRegra">
-          <option value="1">12h meia diária / 16h dobra</option>
-          <option value="2">16h dobra</option>
-          <option value="3">12h até 15h proporcional 1/12 + 16h-19h 1,5 cachê + 20h+ 2 diárias</option>
-          <option value="4">Acima de 12h, hora extra a 1/4 de hora</option>
-          <option value="5">Acima de 12h, hora extra a 1/12 de hora</option>
-        </select>
-      </div>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-primary" id="btnSalvarEmpresa">Salvar empresa</button>
-      <button class="btn btn-secondary" id="btnCancelarEdicao">Cancelar edição</button>
     </div>
   </div>
 
   <div class="card">
     <h2>Empresas cadastradas</h2>
-    <div id="listaEmpresas" class="empresas-lista">
-      <p style="color:#95a5a6;">Nenhuma empresa cadastrada.</p>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+      <input type="text" id="novaEmpresa" placeholder="Nome da empresa">
+      <button id="btnAddEmpresa">Adicionar empresa</button>
+      <button id="btnDelEmpresa" class="danger">Remover selecionada</button>
     </div>
+    <select id="listaEmpresas" size="4" style="width:100%; margin-top:8px;"></select>
   </div>
 
   <div class="card">
-    <h2>Backup</h2>
-    <div class="btn-row">
-      <button class="btn btn-secondary" id="btnExportar">Exportar backup (.json)</button>
-      <button class="btn btn-secondary" id="btnImportar">Importar backup (.json)</button>
-      <input type="file" id="inputImport" accept=".json" class="hidden">
+    <h2>Pré-visualização</h2>
+    <div class="event-area">
+      <button id="btnAddLinha">Adicionar linha</button>
+      <button id="btnCalcular" class="secondary">Calcular</button>
+      <button id="btnExportCsv" class="secondary">Exportar CSV</button>
+      <button id="btnBackup" class="secondary">Backup (JSON)</button>
+      <button id="btnRestore" class="secondary">Restaurar</button>
+      <input type="file" id="restoreInput" accept="application/json" class="hidden">
+      <button id="btnLimpar" class="danger">Limpar tudo</button>
     </div>
-    <div class="form-group" style="margin-top:12px;">
-      <label for="modoImport">Modo de importação</label>
-      <select id="modoImport">
-        <option value="substituir">Substituir tudo</option>
-        <option value="mesclar">Mesclar (adiciona novas, sem duplicar nomes)</option>
-      </select>
+    <div style="overflow:auto;">
+      <table id="tabela">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Entrada</th>
+            <th>Saída</th>
+            <th>Horas trabalhadas no dia</th>
+            <th>Evento/Observação</th>
+            <th>Empresa</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
     </div>
-    <div id="importStatus" class="status hidden"></div>
+    <div class="total-horas" id="totalHorasPreview">Total: 0h 0m</div>
+    <div class="summary" id="resumo"></div>
   </div>
+</div>
 
-</section>
-
-<footer>
-  Calculadora de Diárias - Eventos · 100% client-side · dados salvos no seu navegador (localStorage)
-</footer>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-/* =====================================================================
-   CALCULADORA DE DIÁRIAS - EVENTOS
-   App single-file HTML+CSS+JS. Tudo client-side.
-   Única chamada de rede: carregamento opcional do pdf.js (CDN).
-   ===================================================================== */
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-/* ============ CHAVE DE PERSISTÊNCIA ============ */
-const STORAGE_KEY = 'empresas_calc_diarias_v1';
+  const STORAGE_KEY = 'controleHorasData';
+  const EMPRESAS_KEY = 'controleHorasEmpresas';
 
-/* ============ ESTADO GLOBAL ============ */
-let empresas = [];        // lista de empresas do localStorage
-let dias = [];            // lista de dias processados {data, entrada, saida, horas, evento}
-let ultimoResultado = []; // resultado do cálculo com valores por dia
-let pdfjsCarregado = false;
+  let linhas = [];
+  let empresas = [];
 
-/* ============ MAPEAMENTO DE MESES (pt-BR abreviado) ============ */
-const MESES = {
-  jan:1, fev:2, mar:3, abr:4, mai:5, jun:6,
-  jul:7, ago:8, set:9, out:10, nov:11, dez:12
-};
+  const $ = (id) => document.getElementById(id);
+  const tbody = $('tbody');
+  const selectEmpresaEvento = $('selectEmpresaEvento');
+  const listaEmpresas = $('listaEmpresas');
 
-/* ============ NOMES DAS REGRAS (para exibição) ============ */
-const NOMES_REGRAS = {
-  '1': '12h meia diária / 16h dobra',
-  '2': '16h dobra',
-  '3': '12h até 15h proporcional 1/12 + 16h-19h 1,5 cachê + 20h+ 2 diárias',
-  '4': 'Acima de 12h, hora extra a 1/4 de hora',
-  '5': 'Acima de 12h, hora extra a 1/12 de hora'
-};
-
-/* =====================================================================
-   UTILIDADES
-   ===================================================================== */
-
-// Formata número como moeda R$ com vírgula decimal
-function formatarMoeda(v) {
-  const n = Number(v || 0);
-  return 'R$ ' + n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-}
-
-// Formata horas decimais como "HHh MMm"
-function formatarHoras(h) {
-  const total = Math.max(0, h);
-  const hh = Math.floor(total);
-  const mm = Math.round((total - hh) * 60);
-  return hh + 'h ' + String(mm).padStart(2,'0') + 'm';
-}
-
-// Gera ID único simples
-function gerarId() {
-  return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
-}
-
-// Escape HTML para evitar quebra de layout
-function esc(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-/* =====================================================================
-   PERSISTÊNCIA EMPRESAS (localStorage)
-   ===================================================================== */
-
-function carregarEmpresas() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    empresas = raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    console.error('Erro ao ler localStorage:', e);
-    empresas = [];
+  function showMsg(txt, tipo) {
+    const box = $('msgBox');
+    box.innerHTML = '<div class="msg ' + (tipo === 'ok' ? 'ok' : 'err') + '">' + txt + '</div>';
+    setTimeout(() => { box.innerHTML = ''; }, 4000);
   }
-}
 
-function salvarEmpresas() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(empresas));
-}
-
-/* =====================================================================
-   CÁLCULO DE DIÁRIAS — 5 REGRAS
-   calcularValorDia(horas, diaria, regra)
-   Retorna o valor em R$ do dia (diária + horas extras conforme regra).
-   A alimentação NÃO entra aqui — é somada à parte no resumo final.
-   ===================================================================== */
-function calcularValorDia(horas, diaria, regra) {
-  const h = Number(horas) || 0;
-  const d = Number(diaria) || 0;
-
-  switch (String(regra)) {
-
-    /* REGRA 1 — "12h meia diária / 16h dobra"
-       horas < 12        -> 0,5 diária
-       12 <= horas < 16  -> 1 diária (cheia, sem proporcional)
-       horas >= 16       -> 2 diárias */
-    case '1':
-      if (h < 12) return d * 0.5;
-      if (h < 16) return d * 1;
-      return d * 2;
-
-    /* REGRA 2 — "16h dobra"
-       horas < 16  -> 1 diária (fixo)
-       horas >= 16 -> 2 diárias */
-    case '2':
-      if (h < 16) return d * 1;
-      return d * 2;
-
-    /* REGRA 3 — "12h até 15h proporcional 1/12 + 16h-19h 1,5 cachê + 20h+ 2 diárias"
-       horas <= 12        -> 1 diária
-       12 < horas < 16    -> 1 diária + (horas-12) * (diária/12)
-       16 <= horas < 20   -> 1,5 diária
-       horas >= 20        -> 2 diárias */
-    case '3':
-      if (h <= 12) return d * 1;
-      if (h < 16)  return d * (1 + (h - 12) * (d / 12) / d); // = d + (h-12)*(d/12)
-      if (h < 20)  return d * 1.5;
-      return d * 2;
-
-    /* REGRA 4 — "Acima de 12h, hora extra a 1/4 de hora"
-       horas <= 12 -> 1 diária
-       horas > 12  -> 1 diária + (horas-12) * (diária/4) */
-    case '4':
-      if (h <= 12) return d * 1;
-      return d + (h - 12) * (d / 4);
-
-    /* REGRA 5 — "Acima de 12h, hora extra a 1/12 de hora"
-       horas <= 12 -> 1 diária
-       horas > 12  -> 1 diária + (horas-12) * (diária/12) */
-    case '5':
-      if (h <= 12) return d * 1;
-      return d + (h - 12) * (d / 12);
-
-    default:
-      return 0;
+  function salvar() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(linhas));
+    localStorage.setItem(EMPRESAS_KEY, JSON.stringify(empresas));
   }
-}
 
-/* =====================================================================
-   NAVEGAÇÃO ENTRE ABAS
-   ===================================================================== */
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-  });
-});
-
-/* =====================================================================
-   ABA EMPRESAS — CRUD
-   ===================================================================== */
-
-const inpNome = document.getElementById('inpNome');
-const inpDiaria = document.getElementById('inpDiaria');
-const inpAlimentacao = document.getElementById('inpAlimentacao');
-const inpRegra = document.getElementById('inpRegra');
-const empresaId = document.getElementById('empresaId');
-const formTitulo = document.getElementById('formEmpresaTitulo');
-const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
-
-function renderizarEmpresas() {
-  const cont = document.getElementById('listaEmpresas');
-  if (!empresas.length) {
-    cont.innerHTML = '<p style="color:#95a5a6;">Nenhuma empresa cadastrada.</p>';
-    return;
+  function carregar() {
+    try { linhas = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e) { linhas = []; }
+    try { empresas = JSON.parse(localStorage.getItem(EMPRESAS_KEY)) || []; } catch(e) { empresas = []; }
+    if (!empresas.length) empresas = ['Empresa A', 'Empresa B'];
   }
-  cont.innerHTML = empresas.map(e => `
-    <div class="empresa-card">
-      <div class="empresa-info">
-        <div class="nome">${esc(e.nome)}</div>
-        <div class="detalhes">Diária: ${formatarMoeda(e.diaria)} · Alimentação/dia: ${formatarMoeda(e.alimentacao)}</div>
-        <div class="regra">Regra: ${esc(NOMES_REGRAS[e.regra] || e.regra)}</div>
-      </div>
-      <div class="empresa-acoes">
-        <button class="btn btn-secondary btn-sm" onclick="editarEmpresa('${e.id}')">Editar</button>
-        <button class="btn btn-danger btn-sm" onclick="excluirEmpresa('${e.id}')">Excluir</button>
-      </div>
-    </div>
-  `).join('');
-}
 
-function limparFormEmpresa() {
-  empresaId.value = '';
-  inpNome.value = '';
-  inpDiaria.value = '';
-  inpAlimentacao.value = '';
-  inpRegra.value = '1';
-  formTitulo.textContent = 'Cadastrar empresa';
-  btnCancelarEdicao.classList.add('hidden');
-}
+  // ---------- Utilitários de data ----------
+  function brToIso(br) {
+    if (!br) return '';
+    const p = br.split('/');
+    if (p.length !== 3) return '';
+    const [d, m, a] = p;
+    if (!d || !m || !a) return '';
+    return a + '-' + (m.length === 1 ? '0'+m : m) + '-' + (d.length === 1 ? '0'+d : d);
+  }
+  function isoToBr(iso) {
+    if (!iso) return '';
+    const p = iso.split('-');
+    if (p.length !== 3) return '';
+    const [a, m, d] = p;
+    if (!a || !m || !d) return '';
+    return (d.length === 1 ? '0'+d : d) + '/' + (m.length === 1 ? '0'+m : m) + '/' + a;
+  }
 
-// Editar empresa (global para onclick)
-window.editarEmpresa = function(id) {
-  const e = empresas.find(x => x.id === id);
-  if (!e) return;
-  empresaId.value = e.id;
-  inpNome.value = e.nome;
-  inpDiaria.value = e.diaria;
-  inpAlimentacao.value = e.alimentacao;
-  inpRegra.value = e.regra;
-  formTitulo.textContent = 'Editar empresa';
-  btnCancelarEdicao.classList.remove('hidden');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
+  // ---------- Utilitários de horas ----------
+  function parseHora(h) {
+    if (!h) return null;
+    h = String(h).trim();
+    let m = h.match(/^(\d{1,2}):(\d{2})$/);
+    if (m) return { h: +m[1], min: +m[2] };
+    m = h.match(/^(\d{1,2})h(\s*)(\d{1,2})?m?$/i);
+    if (m) return { h: +m[1], min: m[3] ? +m[3] : 0 };
+    m = h.match(/^(\d{1,2})$/);
+    if (m) return { h: +m[1], min: 0 };
+    return null;
+  }
+  function minutosEntre(entrada, saida) {
+    const e = parseHora(entrada), s = parseHora(saida);
+    if (!e || !s) return 0;
+    let em = e.h * 60 + e.min, sm = s.h * 60 + s.min;
+    if (sm < em) sm += 24 * 60; // virada de dia
+    return sm - em;
+  }
+  function formatMin(min) {
+    if (min < 0) min = 0;
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    return h + 'h ' + m + 'm';
+  }
 
-// Excluir empresa (global para onclick)
-window.excluirEmpresa = function(id) {
-  const e = empresas.find(x => x.id === id);
-  if (!e) return;
-  if (!confirm('Confirma excluir a empresa "' + e.nome + '"?')) return;
-  empresas = empresas.filter(x => x.id !== id);
-  salvarEmpresas();
-  renderizarEmpresas();
-  popularSelectEmpresas();
-};
-
-document.getElementById('btnSalvarEmpresa').addEventListener('click', () => {
-  const nome = inpNome.value.trim();
-  const diaria = parseFloat(inpDiaria.value);
-  const alimentacao = parseFloat(inpAlimentacao.value);
-  const regra = inpRegra.value;
-
-  if (!nome) { alert('Informe o nome da empresa.'); return; }
-  if (isNaN(diaria) || diaria < 0) { alert('Informe um valor de diária válido.'); return; }
-  if (isNaN(alimentacao) || alimentacao < 0) { alert('O valor da alimentação é obrigatório. Informe um valor válido (use 0 se não houver).'); return; }
-
-  if (empresaId.value) {
-    // edição
-    const e = empresas.find(x => x.id === empresaId.value);
-    if (e) {
-      e.nome = nome; e.diaria = diaria; e.alimentacao = alimentacao; e.regra = regra;
+  // ---------- Cálculo: 5 regras ----------
+  function calcularLinha(linha) {
+    const min = minutosEntre(linha.entrada, linha.saida);
+    // Regra 1: base = minutos trabalhados
+    let total = min;
+    // Regra 2: desconto de almoço se >= 6h (30 min)
+    if (min >= 360) total -= 30;
+    // Regra 3: adicional noturno (após 22h) - 10%
+    if (linha.saida) {
+      const s = parseHora(linha.saida);
+      if (s && (s.h >= 22 || s.h < 4)) total = Math.round(total * 1.10);
     }
-  } else {
-    // nova
-    empresas.push({ id: gerarId(), nome, diaria, alimentacao, regra });
+    // Regra 4: horas extras (>8h) +25% sobre o excedente
+    if (min > 480) {
+      const ex = min - 480;
+      total += Math.round(ex * 0.25);
+    }
+    // Regra 5: mínimo de 2h por registro
+    if (total > 0 && total < 120) total = 120;
+    return total;
   }
-  salvarEmpresas();
-  renderizarEmpresas();
-  popularSelectEmpresas();
-  limparFormEmpresa();
-});
 
-document.getElementById('btnCancelarEdicao').addEventListener('click', limparFormEmpresa);
+  // ---------- Empresas ----------
+  function renderEmpresas() {
+    listaEmpresas.innerHTML = '';
+    selectEmpresaEvento.innerHTML = '<option value="">(selecione)</option>';
+    empresas.forEach(e => {
+      const o1 = document.createElement('option');
+      o1.value = e; o1.textContent = e; listaEmpresas.appendChild(o1);
+      const o2 = document.createElement('option');
+      o2.value = e; o2.textContent = e; selectEmpresaEvento.appendChild(o2);
+    });
+  }
+  $('btnAddEmpresa').onclick = () => {
+    const v = $('novaEmpresa').value.trim();
+    if (!v) return showMsg('Informe o nome da empresa.', 'err');
+    if (empresas.includes(v)) return showMsg('Empresa já existe.', 'err');
+    empresas.push(v); $('novaEmpresa').value = '';
+    renderEmpresas(); salvar(); showMsg('Empresa adicionada.', 'ok');
+  };
+  $('btnDelEmpresa').onclick = () => {
+    const v = listaEmpresas.value;
+    if (!v) return showMsg('Selecione uma empresa.', 'err');
+    empresas = empresas.filter(e => e !== v);
+    renderEmpresas(); salvar(); showMsg('Empresa removida.', 'ok');
+  };
 
-/* =====================================================================
-   BACKUP EXPORT / IMPORT
-   ===================================================================== */
+  // ---------- Aplicar empresa ----------
+  function aplicarEmpresaTodas(forcar) {
+    const emp = selectEmpresaEvento.value;
+    if (!emp) return showMsg('Selecione uma empresa no topo.', 'err');
+    linhas.forEach(l => {
+      if (forcar || !l.empresa) l.empresa = emp;
+    });
+    salvar(); renderTabela(); atualizarResumo();
+    showMsg('Empresa aplicada às linhas.', 'ok');
+  }
+  selectEmpresaEvento.onchange = () => { aplicarEmpresaTodas(false); };
+  $('btnAplicarEmpresaTodas').onclick = () => { aplicarEmpresaTodas(true); };
 
-document.getElementById('btnExportar').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(empresas, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'backup_empresas_calc_diarias.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-});
+  // ---------- Tabela ----------
+  function renderTabela() {
+    tbody.innerHTML = '';
+    linhas.forEach((l, idx) => {
+      const tr = document.createElement('tr');
 
-document.getElementById('btnImportar').addEventListener('click', () => {
-  document.getElementById('inputImport').click();
-});
+      // Data (input date)
+      const tdData = document.createElement('td');
+      const inpData = document.createElement('input');
+      inpData.type = 'date';
+      inpData.value = brToIso(l.data);
+      inpData.onchange = () => {
+        l.data = isoToBr(inpData.value);
+        salvar();
+      };
+      tdData.appendChild(inpData);
+      tr.appendChild(tdData);
 
-document.getElementById('inputImport').addEventListener('change', async (ev) => {
-  const status = document.getElementById('importStatus');
-  const file = ev.target.files[0];
-  if (!file) return;
-  const modo = document.getElementById('modoImport').value;
-  try {
-    const text = await file.text();
-    const dados = JSON.parse(text);
-    if (!Array.isArray(dados)) throw new Error('Formato inválido: esperado um array.');
+      // Entrada
+      const tdEnt = document.createElement('td');
+      const inpEnt = document.createElement('input');
+      inpEnt.type = 'text';
+      inpEnt.value = l.entrada || '';
+      inpEnt.oninput = () => { l.entrada = inpEnt.value; atualizarTotalPreview(); };
+      inpEnt.onchange = () => { salvar(); atualizarTotalPreview(); };
+      tdEnt.appendChild(inpEnt);
+      tr.appendChild(tdEnt);
 
-    if (modo === 'substituir') {
-      empresas = dados.map(e => ({
-        id: e.id || gerarId(),
-        nome: String(e.nome || ''),
-        diaria: Number(e.diaria) || 0,
-        alimentacao: Number(e.alimentacao) || 0,
-        regra: String(e.regra || '1')
-      }));
-    } else {
-      // mesclar: adiciona empresas novas por nome (case-insensitive), sem duplicar
-      const nomesExistentes = empresas.map(e => e.nome.toLowerCase());
-      dados.forEach(e => {
-        const nome = String(e.nome || '').trim();
-        if (!nome) return;
-        if (nomesExistentes.includes(nome.toLowerCase())) return;
-        empresas.push({
-          id: gerarId(),
-          nome,
-          diaria: Number(e.diaria) || 0,
-          alimentacao: Number(e.alimentacao) || 0,
-          regra: String(e.regra || '1')
-        });
-        nomesExistentes.push(nome.toLowerCase());
+      // Saída
+      const tdSai = document.createElement('td');
+      const inpSai = document.createElement('input');
+      inpSai.type = 'text';
+      inpSai.value = l.saida || '';
+      inpSai.oninput = () => { l.saida = inpSai.value; atualizarTotalPreview(); };
+      inpSai.onchange = () => { salvar(); atualizarTotalPreview(); };
+      tdSai.appendChild(inpSai);
+      tr.appendChild(tdSai);
+
+      // Horas trabalhadas no dia (calculado)
+      const tdHoras = document.createElement('td');
+      const min = minutosEntre(l.entrada, l.saida);
+      tdHoras.textContent = min > 0 ? formatMin(min) : '-';
+      tr.appendChild(tdHoras);
+
+      // Evento/Observação
+      const tdEv = document.createElement('td');
+      const inpEv = document.createElement('input');
+      inpEv.type = 'text';
+      inpEv.value = l.nomeEvento || '';
+      inpEv.oninput = () => { l.nomeEvento = inpEv.value; };
+      inpEv.onchange = () => { salvar(); };
+      tdEv.appendChild(inpEv);
+      tr.appendChild(tdEv);
+
+      // Empresa
+      const tdEmp = document.createElement('td');
+      const selEmp = document.createElement('select');
+      const optVazia = document.createElement('option');
+      optVazia.value = ''; optVazia.textContent = '(selecione)';
+      selEmp.appendChild(optVazia);
+      empresas.forEach(e => {
+        const o = document.createElement('option');
+        o.value = e; o.textContent = e;
+        if (l.empresa === e) o.selected = true;
+        selEmp.appendChild(o);
       });
+      selEmp.value = l.empresa || '';
+      selEmp.onchange = () => { l.empresa = selEmp.value; salvar(); atualizarResumo(); };
+      tdEmp.appendChild(selEmp);
+      tr.appendChild(tdEmp);
+
+      // Ações
+      const tdAc = document.createElement('td');
+      tdAc.className = 'row-actions';
+      const btnUp = document.createElement('button');
+      btnUp.textContent = '↑'; btnUp.className = 'secondary';
+      btnUp.onclick = () => { if (idx > 0) { const t = linhas[idx-1]; linhas[idx-1] = linhas[idx]; linhas[idx] = t; salvar(); renderTabela(); atualizarResumo(); } };
+      const btnDown = document.createElement('button');
+      btnDown.textContent = '↓'; btnDown.className = 'secondary';
+      btnDown.onclick = () => { if (idx < linhas.length-1) { const t = linhas[idx+1]; linhas[idx+1] = linhas[idx]; linhas[idx] = t; salvar(); renderTabela(); atualizarResumo(); } };
+      const btnDel = document.createElement('button');
+      btnDel.textContent = 'X'; btnDel.className = 'danger';
+      btnDel.onclick = () => { linhas.splice(idx, 1); salvar(); renderTabela(); atualizarResumo(); };
+      tdAc.appendChild(btnUp); tdAc.appendChild(btnDown); tdAc.appendChild(btnDel);
+      tr.appendChild(tdAc);
+
+      tbody.appendChild(tr);
+    });
+    atualizarTotalPreview();
+  }
+
+  function atualizarTotalPreview() {
+    let total = 0;
+    linhas.forEach(l => { total += minutosEntre(l.entrada, l.saida); });
+    $('totalHorasPreview').textContent = 'Total: ' + formatMin(total);
+  }
+
+  function atualizarResumo() {
+    const res = $('resumo');
+    res.innerHTML = '';
+    let totalGeral = 0;
+    const porEmpresa = {};
+    linhas.forEach(l => {
+      const c = calcularLinha(l);
+      totalGeral += c;
+      const emp = l.empresa || '(sem empresa)';
+      porEmpresa[emp] = (porEmpresa[emp] || 0) + c;
+    });
+    const it = document.createElement('div');
+    it.className = 'item';
+    it.innerHTML = 'Total geral: <strong>' + formatMin(totalGeral) + '</strong>';
+    res.appendChild(it);
+    Object.keys(porEmpresa).forEach(e => {
+      const d = document.createElement('div');
+      d.className = 'item';
+      d.innerHTML = e + ': <strong>' + formatMin(porEmpresa[e]) + '</strong>';
+      res.appendChild(d);
+    });
+    atualizarTotalPreview();
+  }
+
+  // ---------- Linhas ----------
+  function novaLinha() {
+    return { data: '', entrada: '', saida: '', nomeEvento: '', empresa: '' };
+  }
+  $('btnAddLinha').onclick = () => {
+    linhas.push(novaLinha());
+    salvar(); renderTabela(); atualizarResumo();
+  };
+  $('btnCalcular').onclick = () => { atualizarResumo(); showMsg('Cálculo atualizado.', 'ok'); };
+  $('btnLimpar').onclick = () => {
+    if (!confirm('Limpar todas as linhas?')) return;
+    linhas = []; salvar(); renderTabela(); atualizarResumo();
+  };
+
+  // ---------- Parsers de texto ----------
+  function parserTexto1(texto) {
+    // Formato: data dd/mm/aaaa entrada saida evento
+    const out = [];
+    texto.split(/\n/).forEach(linha => {
+      linha = linha.trim();
+      if (!linha) return;
+      const p = linha.split(/\s+/);
+      if (p.length >= 3) {
+        out.push({ data: p[0], entrada: p[1], saida: p[2], nomeEvento: p.slice(3).join(' ') || '', empresa: '' });
+      }
+    });
+    return out;
+  }
+  function parserTexto2(texto) {
+    // Formato: data;entrada;saida;evento;empresa
+    const out = [];
+    texto.split(/\n/).forEach(linha => {
+      linha = linha.trim();
+      if (!linha) return;
+      const p = linha.split(';');
+      if (p.length >= 3) {
+        out.push({ data: p[0].trim(), entrada: p[1].trim(), saida: p[2].trim(), nomeEvento: (p[3]||'').trim(), empresa: (p[4]||'').trim() });
+      }
+    });
+    return out;
+  }
+  $('btnParseTexto1').onclick = () => {
+    const t = $('textoInput').value;
+    if (!t) return showMsg('Cole o texto primeiro.', 'err');
+    linhas = linhas.concat(parserTexto1(t));
+    salvar(); renderTabela(); atualizarResumo(); showMsg('Parser 1 aplicado.', 'ok');
+  };
+  $('btnParseTexto2').onclick = () => {
+    const t = $('textoInput').value;
+    if (!t) return showMsg('Cole o texto primeiro.', 'err');
+    linhas = linhas.concat(parserTexto2(t));
+    salvar(); renderTabela(); atualizarResumo(); showMsg('Parser 2 aplicado.', 'ok');
+  };
+
+  // ---------- PDF ----------
+  $('btnProcessPdf').onclick = async () => {
+    const file = $('pdfInput').files[0];
+    if (!file) return showMsg('Selecione um PDF.', 'err');
+    try {
+      const buf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      let txt = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        txt += content.items.map(it => it.str).join(' ') + '\n';
+      }
+      const novas = parserTexto1(txt);
+      if (!novas.length) novas.push(...parserTexto2(txt));
+      linhas = linhas.concat(novas);
+      salvar(); renderTabela(); atualizarResumo();
+      showMsg('PDF processado: ' + novas.length + ' linhas.', 'ok');
+    } catch (e) {
+      showMsg('Erro ao processar PDF: ' + e.message, 'err');
     }
-    salvarEmpresas();
-    renderizarEmpresas();
-    popularSelectEmpresas();
-    status.className = 'status ok';
-    status.textContent = 'Backup importado com sucesso! ' + empresas.length + ' empresa(s) no total.';
-  } catch (err) {
-    status.className = 'status erro';
-    status.textContent = 'Erro ao importar: ' + err.message;
+  };
+
+  // ---------- CSV ----------
+  function toCsvCell(v) {
+    v = String(v == null ? '' : v);
+    if (/[;"\n]/.test(v)) v = '"' + v.replace(/"/g, '""') + '"';
+    return v;
   }
-  status.classList.remove('hidden');
-  ev.target.value = '';
-});
+  $('btnExportCsv').onclick = () => {
+    const header = ['Data','Entrada','Saída','Horas trabalhadas no dia','Evento/Observação','Empresa','Total calculado'];
+    const rows = linhas.map(l => [
+      l.data, l.entrada, l.saida, formatMin(minutosEntre(l.entrada, l.saida)),
+      l.nomeEvento, l.empresa, formatMin(calcularLinha(l))
+    ].map(toCsvCell).join(';'));
+    const csv = header.join(';') + '\n' + rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'controle_horas.csv';
+    a.click();
+  };
 
-/* =====================================================================
-   ABA CALCULAR — SELECT DE EMPRESAS
-   ===================================================================== */
-
-const selectEmpresa = document.getElementById('selectEmpresa');
-
-function popularSelectEmpresas() {
-  const atual = selectEmpresa.value;
-  selectEmpresa.innerHTML = '<option value="">-- Selecione a empresa --</option>' +
-    empresas.map(e => `<option value="${e.id}">${esc(e.nome)}</option>`).join('');
-  if (atual && empresas.find(e => e.id === atual)) selectEmpresa.value = atual;
-  atualizarRefEmpresa();
-}
-
-function atualizarRefEmpresa() {
-  const ref = document.getElementById('empresaRef');
-  const id = selectEmpresa.value;
-  if (!id) { ref.classList.add('hidden'); return; }
-  const e = empresas.find(x => x.id === id);
-  if (!e) { ref.classList.add('hidden'); return; }
-  document.getElementById('refDiaria').textContent = formatarMoeda(e.diaria);
-  document.getElementById('refAlimentacao').textContent = formatarMoeda(e.alimentacao);
-  document.getElementById('refRegra').textContent = NOMES_REGRAS[e.regra] || e.regra;
-  ref.classList.remove('hidden');
-}
-selectEmpresa.addEventListener('change', atualizarRefEmpresa);
-
-/* =====================================================================
-   PDF — CARREGAMENTO DINÂMICO DO pdf.js (CDN)
-   ===================================================================== */
-
-const PDFJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-const PDFJS_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-function carregarPdfjs() {
-  return new Promise((resolve, reject) => {
-    if (pdfjsCarregado && window.pdfjsLib) { resolve(); return; }
-    const script = document.createElement('script');
-    script.src = PDFJS_URL;
-    script.onload = () => {
+  // ---------- Backup ----------
+  $('btnBackup').onclick = () => {
+    const data = JSON.stringify({ linhas, empresas }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'backup_controle_horas.json';
+    a.click();
+  };
+  $('btnRestore').onclick = () => $('restoreInput').click();
+  $('restoreInput').onchange = (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
       try {
-        window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
-        pdfjsCarregado = true;
-        resolve();
-      } catch (e) { reject(e); }
+        const d = JSON.parse(r.result);
+        if (d.linhas) linhas = d.linhas;
+        if (d.empresas) empresas = d.empresas;
+        salvar(); renderEmpresas(); renderTabela(); atualizarResumo();
+        showMsg('Backup restaurado.', 'ok');
+      } catch (err) { showMsg('Arquivo inválido.', 'err'); }
     };
-    script.onerror = () => reject(new Error('Falha ao carregar pdf.js (sem internet?).'));
-    document.head.appendChild(script);
-  });
-}
-
-/* EXTRAÇÃO DE TEXTO POR COORDENADAS (crítico):
-   - Para cada página, obtemos os itens de texto (getTextContent).items.
-   - Cada item tem item.transform[5] = coordenada Y e item.transform[4] = X.
-   - Agrupamos itens por Y com tolerância de 3px (Math.round(Y/3)).
-   - Dentro de cada grupo, ordenamos por X (transform[4]).
-   - Juntamos os textos do grupo com espaço -> uma linha visual.
-   - Juntamos todas as linhas com \n, preservando "uma linha = um dia".
-   Isso evita o problema de concatenar tudo em uma string única por página. */
-async function extrairTextoPdf(file) {
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  let textoCompleto = '';
-
-  for (let p = 1; p <= pdf.numPages; p++) {
-    const page = await pdf.getPage(p);
-    const content = await page.getTextContent();
-    const itens = content.items || [];
-
-    // Agrupar por Y (tolerância 3px)
-    const grupos = {};
-    itens.forEach(item => {
-      if (!item.str || !item.transform) return;
-      const y = item.transform[5];
-      const chave = Math.round(y / 3); // tolerância de 3px
-      if (!grupos[chave]) grupos[chave] = [];
-      grupos[chave].push(item);
-    });
-
-    // Ordenar grupos de cima para baixo (Y maior = mais acima no PDF)
-    const chavesOrdenadas = Object.keys(grupos).map(Number).sort((a, b) => b - a);
-    const linhas = chavesOrdenadas.map(chave => {
-      // Dentro do grupo, ordenar por X (esquerda -> direita)
-      const grupo = grupos[chave].sort((a, b) => a.transform[4] - b.transform[4]);
-      return grupo.map(it => it.str).join(' ').replace(/\s+/g, ' ').trim();
-    }).filter(l => l.length > 0);
-
-    textoCompleto += linhas.join('\n') + '\n';
-  }
-  return textoCompleto.trim();
-}
-
-document.getElementById('inputPdf').addEventListener('change', async (ev) => {
-  const status = document.getElementById('pdfStatus');
-  const file = ev.target.files[0];
-  if (!file) return;
-  status.className = 'status info';
-  status.textContent = 'Carregando pdf.js e processando PDF...';
-  status.classList.remove('hidden');
-  try {
-    await carregarPdfjs();
-    const texto = await extrairTextoPdf(file);
-    document.getElementById('textareaFolha').value = texto;
-    status.className = 'status ok';
-    status.textContent = 'PDF processado! Texto extraído e carregado no campo abaixo. Revise antes de processar.';
-  } catch (err) {
-    status.className = 'status avisowarn';
-    status.textContent = 'Sem internet no momento — cole o texto da folha de ponto manualmente no campo abaixo.';
-  }
-  ev.target.value = '';
-});
-
-/* =====================================================================
-   PARSER DE TEXTO — DUAS CAMADAS
-   ===================================================================== */
-
-/* CAMADA 1 — Padrão "Ponto Fácil"
-   Exemplo de linha:
-     "seg., 01 dez. 2025    08:00    RENAULT    11:00    03h 00m"
-     "qua., 03 dez. 2025    08:00    CABORÉ    01:00⁺¹    17h 00m"
-   Regex tolerante a múltiplos espaços.
-   Usa a duração "NNh NNm" DIRETAMENTE como horas trabalhadas
-   (não recalcula entrada/saída — evita erro em virada de dia). */
-const REGEX_PONTO_FACIL =
-  /(\w{3})\.,\s*(\d{1,2})\s+([a-zçéê]{3,4})\.?\s+(\d{4})\s+(\d{1,2}:\d{2})\s+(.+?)\s+(\d{1,2}:\d{2})(⁺¹)?\s+(\d{1,2})h\s*(\d{1,2})m/i;
-
-function parsePontoFacil(linha) {
-  const m = linha.match(REGEX_PONTO_FACIL);
-  if (!m) return null;
-  const [, diaSemana, dia, mesAbrev, ano, entrada, evento, saida, virada, hStr, mStr] = m;
-  const mesNum = MESES[mesAbrev.toLowerCase()];
-  if (!mesNum) return null;
-
-  const dd = String(dia).padStart(2, '0');
-  const mm = String(mesNum).padStart(2, '0');
-  const data = `${dd}/${mm}/${ano}`;
-
-  // Duração direta do PDF (evita erro de virada de dia)
-  const horas = (parseInt(hStr, 10) || 0) + (parseInt(mStr, 10) || 0) / 60;
-
-  return {
-    data,
-    entrada,
-    saida: saida + (virada ? virada : ''),
-    horas,
-    evento: evento.trim()
+    r.readAsText(f);
   };
-}
 
-/* CAMADA 2 — Parser genérico (fallback)
-   Para linhas que NÃO casam com Ponto Fácil:
-   - Reconhece datas dd/mm/aaaa ou dd-mm-aaaa
-   - Reconhece horários HH:MM (todos na linha)
-   - Palavras-chave: Entrada/Saída/Total/Horas trabalhadas
-   - Se 2 horários: 1º=entrada, 2º=saída, calcula diferença (virada se saída<entrada)
-   - Se 3+ horários: 1º=entrada, 2º=saída, último=duração pronta
-   - Se nada casar, ignora a linha. */
-function parseGenerico(linha) {
-  // data dd/mm/aaaa ou dd-mm-aaaa
-  const dataMatch = linha.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
-  // horários HH:MM
-  const horarios = linha.match(/\d{1,2}:\d{2}(⁺¹)?/g) || [];
-
-  if (!dataMatch && horarios.length < 2) return null;
-
-  let data = '';
-  if (dataMatch) {
-    const dd = String(dataMatch[1]).padStart(2, '0');
-    const mm = String(dataMatch[2]).padStart(2, '0');
-    let aa = dataMatch[3];
-    if (aa.length === 2) aa = '20' + aa;
-    data = `${dd}/${mm}/${aa}`;
-  }
-
-  // tenta extrair evento: texto entre aspas, ou palavra maiúscula isolada
-  let evento = '';
-  const aspas = linha.match(/"([^"]+)"/);
-  if (aspas) evento = aspas[1];
-
-  let entrada = '', saida = '', horas = 0;
-
-  if (horarios.length === 2) {
-    entrada = horarios[0];
-    saida = horarios[1];
-    horas = calcularDiferencaHoras(entrada, saida);
-  } else if (horarios.length >= 3) {
-    entrada = horarios[0];
-    saida = horarios[1];
-    // último horário é a duração pronta (formato HH:MM)
-    const dur = horarios[horarios.length - 1];
-    const dm = dur.match(/(\d{1,2}):(\d{2})/);
-    if (dm) horas = (parseInt(dm[1],10) || 0) + (parseInt(dm[2],10) || 0) / 60;
-  } else if (horarios.length === 1 && data) {
-    // só um horário e tem data — não dá para calcular, ignora
-    return null;
-  } else {
-    return null;
-  }
-
-  if (horas < 0) horas = 0;
-  return { data, entrada, saida, horas, evento };
-}
-
-// Calcula diferença entre entrada e saída (considera virada de dia se saída < entrada)
-function calcularDiferencaHoras(ent, sai) {
-  const parseH = (s) => {
-    const limpo = String(s).replace('⁺¹', '');
-    const [h, m] = limpo.split(':').map(x => parseInt(x, 10) || 0);
-    return h + m / 60;
-  };
-  let e = parseH(ent);
-  let s = parseH(sai);
-  // se a string de saída tem sufixo ⁺¹, soma 24h
-  if (String(sai).includes('⁺¹')) s += 24;
-  let diff = s - e;
-  if (diff < 0) diff += 24; // virada de dia
-  return diff;
-}
-
-/* Função principal de parsing: roda as duas camadas linha a linha */
-function parseFolha(texto) {
-  const linhas = texto.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
-  const resultado = [];
-
-  for (const linha of linhas) {
-    // Ignora cabeçalhos/rodapés/resumo
-    if (/^resumo/i.test(linha)) continue;
-    if (/^total/i.test(linha) && !/\d{1,2}:\d{2}/.test(linha)) continue;
-
-    // CAMADA 1 — Ponto Fácil (prioritária)
-    const pf = parsePontoFacil(linha);
-    if (pf) { resultado.push(pf); continue; }
-
-    // CAMADA 2 — genérico (fallback)
-    const gen = parseGenerico(linha);
-    if (gen) resultado.push(gen);
-  }
-  return resultado;
-}
-
-/* =====================================================================
-   ABA CALCULAR — PROCESSAR / TABELA EDITÁVEL
-   ===================================================================== */
-
-const textareaFolha = document.getElementById('textareaFolha');
-const tbodyDias = document.getElementById('tbodyDias');
-const cardTabela = document.getElementById('cardTabela');
-const processarStatus = document.getElementById('processarStatus');
-
-document.getElementById('btnProcessar').addEventListener('click', () => {
-  const texto = textareaFolha.value.trim();
-  if (!texto) {
-    processarStatus.className = 'status erro';
-    processarStatus.textContent = 'Nenhum texto para processar. Envie um PDF ou cole a folha de ponto.';
-    processarStatus.classList.remove('hidden');
-    return;
-  }
-  dias = parseFolha(texto);
-  if (!dias.length) {
-    processarStatus.className = 'status erro';
-    processarStatus.textContent = 'Nenhum dia detectado. Revise o texto, edite manualmente ou use \"+ Adicionar linha manual\".';
-    processarStatus.classList.remove('hidden');
-    cardTabela.classList.add('hidden');
-    return;
-  }
-  processarStatus.className = 'status ok';
-  processarStatus.textContent = `${dias.length} dia(s) detectado(s).`;
-  processarStatus.classList.remove('hidden');
-  renderizarTabelaDias();
-  cardTabela.classList.remove('hidden');
-  // esconde resultado anterior se houver
-  document.getElementById('cardResultado').classList.add('hidden');
-});
-
-function renderizarTabelaDias() {
-  tbodyDias.innerHTML = dias.map((d, i) => `
-    <tr data-i="${i}">
-      <td><input type="text" class="c-data" value="${esc(d.data)}"></td>
-      <td><input type="text" class="c-ent" value="${esc(d.entrada)}"></td>
-      <td><input type="text" class="c-sai" value="${esc(d.saida)}"></td>
-      <td><input type="number" class="c-horas" step="0.01" min="0" value="${(Number(d.horas)||0).toFixed(2)}"></td>
-      <td><input type="text" class="c-evento" value="${esc(d.evento)}"></td>
-      <td><button class="btn btn-danger btn-sm" onclick="removerLinha(${i})">Remover</button></td>
-    </tr>
-  `).join('');
-}
-
-window.removerLinha = function(i) {
-  dias.splice(i, 1);
-  renderizarTabelaDias();
-};
-
-document.getElementById('btnAddLinha').addEventListener('click', () => {
-  dias.push({ data: '', entrada: '', saida: '', horas: 0, evento: '' });
-  renderizarTabelaDias();
-});
-
-// Sincroniza inputs editáveis com o array `dias` antes de calcular
-function sincronizarDiasDaTabela() {
-  const linhas = tbodyDias.querySelectorAll('tr');
-  const novo = [];
-  linhas.forEach(tr => {
-    novo.push({
-      data: tr.querySelector('.c-data').value.trim(),
-      entrada: tr.querySelector('.c-ent').value.trim(),
-      saida: tr.querySelector('.c-sai').value.trim(),
-      horas: parseFloat(tr.querySelector('.c-horas').value) || 0,
-      evento: tr.querySelector('.c-evento').value.trim()
-    });
-  });
-  dias = novo;
-}
-
-/* =====================================================================
-   CALCULAR TOTAL DO EVENTO
-   ===================================================================== */
-
-document.getElementById('btnCalcular').addEventListener('click', () => {
-  const id = selectEmpresa.value;
-  if (!id) { alert('Selecione uma empresa primeiro.'); return; }
-  const emp = empresas.find(x => x.id === id);
-  if (!emp) { alert('Empresa não encontrada.'); return; }
-
-  sincronizarDiasDaTabela();
-  if (!dias.length) { alert('Nenhum dia para calcular.'); return; }
-
-  ultimoResultado = dias.map(d => {
-    const valorDia = calcularValorDia(d.horas, emp.diaria, emp.regra);
-    return {
-      data: d.data,
-      entrada: d.entrada,
-      saida: d.saida,
-      horas: Number(d.horas) || 0,
-      evento: d.evento,
-      valorDia,
-      alimentacao: Number(emp.alimentacao) || 0
-    };
-  });
-
-  renderizarResultado(emp);
-});
-
-function renderizarResultado(emp) {
-  const tbody = document.getElementById('tbodyResultado');
-  tbody.innerHTML = ultimoResultado.map(r => `
-    <tr>
-      <td>${esc(r.data)}</td>
-      <td>${esc(r.entrada)}</td>
-      <td>${esc(r.saida)}</td>
-      <td>${formatarHoras(r.horas)}</td>
-      <td>${esc(r.evento)}</td>
-      <td class="valor">${formatarMoeda(r.valorDia)}</td>
-      <td class="valor">${formatarMoeda(r.alimentacao)}</td>
-    </tr>
-  `).join('');
-
-  // Totais
-  const totalHoras = ultimoResultado.reduce((s, r) => s + r.horas, 0);
-  const totalDiarias = ultimoResultado.reduce((s, r) => s + r.valorDia, 0);
-  const totalAlimentacao = ultimoResultado.reduce((s, r) => s + r.alimentacao, 0);
-  const totalGeral = totalDiarias + totalAlimentacao;
-  const qtdDias = ultimoResultado.length;
-
-  document.getElementById('resumoFinal').innerHTML = `
-    <h2>Resumo final do evento</h2>
-    <div class="resumo-grid">
-      <div class="resumo-item">
-        <div class="label">Dias trabalhados</div>
-        <div class="valor">${qtdDias}</div>
-      </div>
-      <div class="resumo-item">
-        <div class="label">Total de horas</div>
-        <div class="valor">${formatarHoras(totalHoras)}</div>
-      </div>
-      <div class="resumo-item">
-        <div class="label">Total em diárias/horas extras</div>
-        <div class="valor">${formatarMoeda(totalDiarias)}</div>
-      </div>
-      <div class="resumo-item">
-        <div class="label">Total em alimentação (somado à parte)</div>
-        <div class="valor">${formatarMoeda(totalAlimentacao)}</div>
-      </div>
-      <div class="resumo-item resumo-total">
-        <div class="label">TOTAL GERAL DO EVENTO</div>
-        <div class="valor">${formatarMoeda(totalGeral)}</div>
-      </div>
-    </div>
-  `;
-  document.getElementById('cardResultado').classList.remove('hidden');
-}
-
-/* =====================================================================
-   EXPORTAR CSV
-   ===================================================================== */
-
-document.getElementById('btnCsv').addEventListener('click', () => {
-  if (!ultimoResultado.length) { alert('Nada para exportar. Calcule o total primeiro.'); return; }
-
-  const linhas = [];
-  linhas.push('Data;Entrada;Saida;Horas;Evento;Valor do dia (R$);Alimentacao do dia (R$)');
-  let totalHoras = 0, totalDiarias = 0, totalAlimentacao = 0;
-  ultimoResultado.forEach(r => {
-    totalHoras += r.horas;
-    totalDiarias += r.valorDia;
-    totalAlimentacao += r.alimentacao;
-    linhas.push([
-      r.data,
-      r.entrada,
-      r.saida,
-      formatarHoras(r.horas),
-      '"' + String(r.evento).replace(/"/g,'""') + '"',
-      r.valorDia.toFixed(2).replace('.', ','),
-      r.alimentacao.toFixed(2).replace('.', ',')
-    ].join(';'));
-  });
-  linhas.push('');
-  linhas.push(`TOTAL; ; ;${formatarHoras(totalHoras)};;${totalDiarias.toFixed(2).replace('.',',')};${totalAlimentacao.toFixed(2).replace('.',',')}`);
-  linhas.push(`TOTAL GERAL;;;;;;${(totalDiarias+totalAlimentacao).toFixed(2).replace('.',',')}`);
-
-  const csv = '\uFEFF' + linhas.join('\n'); // BOM para Excel reconhecer UTF-8
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'resultado_evento.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-});
-
-/* =====================================================================
-   LIMPAR
-   ===================================================================== */
-
-document.getElementById('btnLimpar').addEventListener('click', () => {
-  if (!confirm('Limpar texto, tabela e resultado?')) return;
-  textareaFolha.value = '';
-  dias = [];
-  ultimoResultado = [];
-  tbodyDias.innerHTML = '';
-  document.getElementById('tbodyResultado').innerHTML = '';
-  document.getElementById('resumoFinal').innerHTML = '';
-  cardTabela.classList.add('hidden');
-  document.getElementById('cardResultado').classList.add('hidden');
-  processarStatus.classList.add('hidden');
-  document.getElementById('pdfStatus').classList.add('hidden');
-});
-
-/* =====================================================================
-   INICIALIZAÇÃO
-   ===================================================================== */
-carregarEmpresas();
-renderizarEmpresas();
-popularSelectEmpresas();
+  // ---------- Init ----------
+  carregar();
+  renderEmpresas();
+  renderTabela();
+  atualizarResumo();
 </script>
 </body>
 </html>
